@@ -1,0 +1,19 @@
+python -m pip install --upgrade pip
+pip install pyTelegramBotAPI
+pip install pandas
+pip install webdrivermanager
+pip install selenium
+pip install pytest-shutil
+pip install numpy
+pip install matplotlib
+pip install openpyxl
+pip install PyAutoGUI
+pip install pywin32
+pip install gspread
+pip install pyodbc
+pip install cx-Oracle
+pip install cx-Freeze
+pip install pyinstaller
+pip install Nuitka
+pip install zipfile36
+pip install py2exe
