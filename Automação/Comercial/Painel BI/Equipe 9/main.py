@@ -32,7 +32,7 @@ querys={
 
     SET @DTINICIO=CONCAT(YEAR(@DTFIM),'-',MONTH(@DTFIM),'-01')
 
-    SELECT * FROM netfeira.vw_targetestatico
+    SELECT * FROM netfeira.vw_venda_estatico
     WHERE [Data de Faturamento] BETWEEN @DTINICIO AND @DTFIM
     ORDER BY [Data de Faturamento]
 
