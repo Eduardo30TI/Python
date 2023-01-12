@@ -684,6 +684,10 @@ def Whatsapp():
 
                 arquivos=gui.Arquivos(path_dir,'whatsapp.xlsx')
 
+                if(len(arquivos)<=0):
+
+                    continue
+
                 excel=sql.Excel(arquivos[-1])
 
                 for i in range(0,len(excel)):
