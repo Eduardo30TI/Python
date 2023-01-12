@@ -714,6 +714,8 @@ def Whatsapp():
 
                     while contagem==0:
 
+                        print(contagem)
+
                         contagem=len(driver.find_elements(By.CSS_SELECTOR,'p.selectable-text.copyable-text'))
                         time.sleep(1)
 
@@ -752,18 +754,20 @@ def Whatsapp():
                             contagem=len(driver.find_elements(By.CSS_SELECTOR,'p.selectable-text.copyable-text'))
                             time.sleep(1)
 
+                            tempo+=1
+
                             erro=len(driver.find_elements(By.CLASS_NAME,'_3J6wB'))
 
                             block=len(driver.find_elements(By.XPATH,'//*[@id="main"]/footer/div'))
 
-                            if(erro>0 or block>0):
+                            if(erro>0 or block>0 or tempo>=5):
 
                                 break                        
 
                             pass
 
                         campo=driver.find_element(By.CSS_SELECTOR,'p.selectable-text.copyable-text')
-                        campo.send_keys(Keys.ENTER)
+                        #campo.send_keys(Keys.ENTER)
 
                         time.sleep(3)
 
