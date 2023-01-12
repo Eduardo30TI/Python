@@ -692,8 +692,6 @@ def Whatsapp():
 
                 for i in range(0,len(excel)):
 
-<<<<<<< HEAD
-=======
                     ddd=excel['DDD'].loc[excel.index==i].tolist()[-1]
 
                     telefone=excel['Telefone'].loc[excel.index==i].tolist()[-1]
@@ -732,9 +730,6 @@ def Whatsapp():
                             break
                         
                         pass
-                    
->>>>>>> c9050bc7d471a038041cce169bf48a6ac05c1eff
-                    try:
 
                         ddd=excel['DDD'].loc[excel.index==i].tolist()[-1]
 
@@ -759,13 +754,9 @@ def Whatsapp():
 
                             contagem=len(driver.find_elements(By.CSS_SELECTOR,'p.selectable-text.copyable-text'))
                             time.sleep(1)
-<<<<<<< HEAD
-                            
-=======
 
                             tempo+=1
 
->>>>>>> c9050bc7d471a038041cce169bf48a6ac05c1eff
                             erro=len(driver.find_elements(By.CLASS_NAME,'_3J6wB'))
 
                             block=len(driver.find_elements(By.XPATH,'//*[@id="main"]/footer/div'))
@@ -816,20 +807,9 @@ def Whatsapp():
 
                             pass
 
-<<<<<<< HEAD
                         except:
-=======
-                        campo=driver.find_element(By.CSS_SELECTOR,'p.selectable-text.copyable-text')
-                        #campo.send_keys(Keys.ENTER)
->>>>>>> c9050bc7d471a038041cce169bf48a6ac05c1eff
 
                             continue
-
-                        pass
-
-                    except:
-
-                        continue
                     
                     pass
 
