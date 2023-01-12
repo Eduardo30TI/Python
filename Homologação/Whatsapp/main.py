@@ -692,54 +692,23 @@ def Whatsapp():
 
                 for i in range(0,len(excel)):
 
-                    ddd=excel['DDD'].loc[excel.index==i].tolist()[-1]
-
-                    telefone=excel['Telefone'].loc[excel.index==i].tolist()[-1]
-
-                    mensagem=str(excel['Mensagens'].loc[excel.index==i].tolist()[-1]).strip()
-
-                    paths=excel['Path'].loc[(excel.index==i)&(~excel['Path'].isnull())].tolist()
-
-                    tel_format=f'55{ddd}{telefone}'
-
-                    text_format=urllib.parse.quote(mensagem)
-
-                    link_api=f'{link}send?phone={tel_format}&text={text_format}'
-
-                    driver.get(link_api)
-
-                    contagem=len(driver.find_elements(By.CSS_SELECTOR,'p.selectable-text.copyable-text'))
-                    tempo=0
-
-                    while contagem==0:
-
-                        contagem=len(driver.find_elements(By.CSS_SELECTOR,'p.selectable-text.copyable-text'))
-                        time.sleep(1)
-                        
-                        erro=len(driver.find_elements(By.CLASS_NAME,'_3J6wB'))
-
-                        block=len(driver.find_elements(By.XPATH,'//*[@id="main"]/footer/div'))
-
-                        if(erro>0 or block>0):
-
-                            break
-                        
-                        pass
-                    
                     try:
 
-                        if(len(paths)>0):
+                        ddd=excel['DDD'].loc[excel.index==i].tolist()[-1]
 
-                            click=driver.find_element(By.CSS_SELECTOR,'span[data-icon="clip"]')
-                            click.click()
-                            #inserir arquivo
-                            anexo=driver.find_element(By.CSS_SELECTOR,'input[type="file"]')
-                            time.sleep(2)
-                            anexo.send_keys(paths[-1])
-                            time.sleep(3)
-                            driver.window_handles[-1]                    
+                        telefone=excel['Telefone'].loc[excel.index==i].tolist()[-1]
 
-                            pass
+                        mensagem=str(excel['Mensagens'].loc[excel.index==i].tolist()[-1]).strip()
+
+                        paths=excel['Path'].loc[(excel.index==i)&(~excel['Path'].isnull())].tolist()
+
+                        tel_format=f'55{ddd}{telefone}'
+
+                        text_format=urllib.parse.quote(mensagem)
+
+                        link_api=f'{link}send?phone={tel_format}&text={text_format}'
+
+                        driver.get(link_api)
 
                         contagem=len(driver.find_elements(By.CSS_SELECTOR,'p.selectable-text.copyable-text'))
                         tempo=0
@@ -748,21 +717,60 @@ def Whatsapp():
 
                             contagem=len(driver.find_elements(By.CSS_SELECTOR,'p.selectable-text.copyable-text'))
                             time.sleep(1)
-
+                            
                             erro=len(driver.find_elements(By.CLASS_NAME,'_3J6wB'))
 
                             block=len(driver.find_elements(By.XPATH,'//*[@id="main"]/footer/div'))
 
                             if(erro>0 or block>0):
 
-                                break                        
+                                break
+                            
+                            pass
+                        
+                        try:
+
+                            if(len(paths)>0):
+
+                                click=driver.find_element(By.CSS_SELECTOR,'span[data-icon="clip"]')
+                                click.click()
+                                #inserir arquivo
+                                anexo=driver.find_element(By.CSS_SELECTOR,'input[type="file"]')
+                                time.sleep(2)
+                                anexo.send_keys(paths[-1])
+                                time.sleep(3)
+                                driver.window_handles[-1]                    
+
+                                pass
+
+                            contagem=len(driver.find_elements(By.CSS_SELECTOR,'p.selectable-text.copyable-text'))
+                            tempo=0
+
+                            while contagem==0:
+
+                                contagem=len(driver.find_elements(By.CSS_SELECTOR,'p.selectable-text.copyable-text'))
+                                time.sleep(1)
+
+                                erro=len(driver.find_elements(By.CLASS_NAME,'_3J6wB'))
+
+                                block=len(driver.find_elements(By.XPATH,'//*[@id="main"]/footer/div'))
+
+                                if(erro>0 or block>0):
+
+                                    break                        
+
+                                pass
+
+                            campo=driver.find_element(By.CSS_SELECTOR,'p.selectable-text.copyable-text')
+                            campo.send_keys(Keys.ENTER)
+
+                            time.sleep(3)
 
                             pass
 
-                        campo=driver.find_element(By.CSS_SELECTOR,'p.selectable-text.copyable-text')
-                        campo.send_keys(Keys.ENTER)
+                        except:
 
-                        time.sleep(3)
+                            continue
 
                         pass
 
@@ -770,7 +778,6 @@ def Whatsapp():
 
                         continue
                     
-
                     pass
 
                 #salvar alterações
