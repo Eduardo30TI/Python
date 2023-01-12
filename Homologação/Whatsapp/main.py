@@ -703,20 +703,23 @@ def Whatsapp():
                     link_api=f'{link}send?phone={tel_format}&text={text_format}'
 
                     driver.get(link_api)
+                    driver.window_handles[-1]
 
-                    contagem=len(driver.find_elements(By.CSS_SELECTOR,'p.selectable-text.copyable-text'))
+                    contagem=len(driver.find_elements(By.XPATH,'p.selectable-text.copyable-text'))
                     tempo=0
 
                     while contagem==0:
 
                         contagem=len(driver.find_elements(By.CSS_SELECTOR,'p.selectable-text.copyable-text'))
                         time.sleep(1)
+
+                        tempo+=1
                         
                         erro=len(driver.find_elements(By.CLASS_NAME,'_3J6wB'))
 
                         block=len(driver.find_elements(By.XPATH,'//*[@id="main"]/footer/div'))
 
-                        if(erro>0 or block>0):
+                        if(erro>0 or block>0 or tempo>=5):
 
                             break
                         
