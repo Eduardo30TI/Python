@@ -45,6 +45,30 @@ querys={
     SELECT * FROM netfeira.vw_calend
     WHERE Ano=YEAR(GETDATE()) AND [ID Mês]=MONTH(GETDATE())
     
+    """,
+
+    'Vendas':
+
+    """
+
+    SELECT ev.[Total Venda],ev.Úteis,ev.Trabalhado,
+    CONVERT(decimal(15,2),(ev.[Total Venda]/ev.Trabalhado)*ev.Úteis) AS Projeção
+    FROM (
+
+        SELECT SUM([Total Venda]) AS [Total Venda],
+        (SELECT COUNT(Data)
+        FROM netfeira.vw_calend calend
+        WHERE YEAR(calend.Data)=YEAR(GETDATE()) AND MONTH(calend.Data)=MONTH(GETDATE()) AND [Dia Útil]=1) AS [Úteis],
+        (
+        SELECT COUNT([Data Trabalhada])-1
+        FROM netfeira.vw_calend calend
+        WHERE YEAR(calend.Data)=YEAR(GETDATE()) AND MONTH(calend.Data)=MONTH(GETDATE()) AND [Dia Útil]=1) AS [Trabalhado]
+        FROM netfeira.vw_venda_estatico vda
+        WHERE [Tipo de Operação]='VENDAS' AND YEAR(vda.[Data de Faturamento])=YEAR(GETDATE()) 
+        AND MONTH(vda.[Data de Faturamento])=MONTH(GETDATE())
+
+    )ev
+    
     """
     
     
@@ -61,9 +85,9 @@ def Main(tabelas_df):
 
     #consolidado
 
-    perc_meta=1-round(tabelas_df['TabMargem']['Margem Média'].mean(),4)
+    perc_meta=1-round(tabelas_df['TabMargem']['Margem B'].mean(),4)
 
-    total=tabelas_df['Metas']['Meta R$'].sum()
+    total=tabelas_df['Vendas']['Projeção'].sum()
 
     val_meta=round(total*perc_meta,2)
 

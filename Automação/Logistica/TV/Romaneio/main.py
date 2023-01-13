@@ -49,7 +49,31 @@ querys={
     
     SELECT * FROM netfeira.vw_metas    
     
+    """,
+
+    'Vendas':
+
     """
+
+    SELECT ev.[Total Venda],ev.Úteis,ev.Trabalhado,
+    CONVERT(decimal(15,2),(ev.[Total Venda]/ev.Trabalhado)*ev.Úteis) AS Projeção
+    FROM (
+
+        SELECT SUM([Total Venda]) AS [Total Venda],
+        (SELECT COUNT(Data)
+        FROM netfeira.vw_calend calend
+        WHERE YEAR(calend.Data)=YEAR(GETDATE()) AND MONTH(calend.Data)=MONTH(GETDATE()) AND [Dia Útil]=1) AS [Úteis],
+        (
+        SELECT COUNT([Data Trabalhada])-1
+        FROM netfeira.vw_calend calend
+        WHERE YEAR(calend.Data)=YEAR(GETDATE()) AND MONTH(calend.Data)=MONTH(GETDATE()) AND [Dia Útil]=1) AS [Trabalhado]
+        FROM netfeira.vw_venda_estatico vda
+        WHERE [Tipo de Operação]='VENDAS' AND YEAR(vda.[Data de Faturamento])=YEAR(GETDATE()) 
+        AND MONTH(vda.[Data de Faturamento])=MONTH(GETDATE())
+
+    )ev
+    
+    """    
     
 }
 
@@ -65,7 +89,7 @@ def Main(df):
 
         }
 
-    meta=df['Meta']['Meta R$'].sum()
+    meta=df['Vendas']['Projeção'].sum()
 
     perc=df['Log']['Perc'].values[-1]
 
