@@ -4,6 +4,7 @@ from glob import glob
 import requests
 from Tempo import DataHora
 import pandas as pd
+import datetime 
 
 
 sql=Query('Netfeira','sqlserver','MOINHO','192.168.0.252')
@@ -92,7 +93,7 @@ def Mensal(tabelas_df):
 
     data_atual=data.HoraAtual()
 
-    mensal_df=tabelas_df['Pagar'].loc[tabelas_df['Pagar']['Data de Pagamento'].dt.year==data_atual.year]
+    mensal_df=tabelas_df['Pagar'].loc[tabelas_df['Pagar']['Data de Pagamento'].dt.year==data_atual.year] if data_atual.month != 1 else tabelas_df['Pagar'].loc[tabelas_df['Pagar']['Data de Pagamento'].dt.year==data_atual.year -1] 
 
     mensal_df=mensal_df[['Data de Pagamento','Valor Pago R$']].groupby(['Data de Pagamento'],as_index=False).sum()
 
@@ -104,10 +105,10 @@ def Mensal(tabelas_df):
 
     mensal_df['Pago Anterior R$']=mensal_df['ID Mês'].apply(lambda mes:
 
-        tabelas_df['Pagar']['Valor Pago R$'].loc[(tabelas_df['Pagar']['Data de Pagamento'].dt.year==data_atual.year)&(tabelas_df['Pagar']['Data de Pagamento'].dt.month==mes-1)].sum() if mes!=1 else tabelas_df['Pagar']['Valor Pago R$'].loc[(tabelas_df['Pagar']['Data de Pagamento'].dt.year==data_atual.year-1)&(tabelas_df['Pagar']['Data de Pagamento'].dt.month==12)].sum()
+        tabelas_df['Pagar']['Valor Pago R$'].loc[(tabelas_df['Pagar']['Data de Pagamento'].dt.year==data_atual.year -1)&(tabelas_df['Pagar']['Data de Pagamento'].dt.month==mes-1)].sum() if mes!=1 else tabelas_df['Pagar']['Valor Pago R$'].loc[(tabelas_df['Pagar']['Data de Pagamento'].dt.year==data_atual.year)&(tabelas_df['Pagar']['Data de Pagamento'].dt.month==mes -1)].sum()
     )
 
-    mensal_df['Cresc %']=mensal_df.apply(lambda info: round(((info['Valor Pago R$']/info['Pago Anterior R$'])-1),4)*100,axis=1)
+    mensal_df['Cresc %']=mensal_df.apply(lambda info: round(((info['Valor Pago R$']/info['Pago Anterior R$'])-1),4)*100 if info['Pago Anterior R$']>0 else 0,axis=1)
 
     mensal_df['Vendas R$']=mensal_df['ID Mês'].apply(
 
@@ -116,7 +117,7 @@ def Mensal(tabelas_df):
     
     )
 
-    mensal_df['Rep %']=mensal_df.apply(lambda info: round(((info['Valor Pago R$']/info['Vendas R$'])),4)*100,axis=1)
+    mensal_df['Rep %']=mensal_df.apply(lambda info: round(((info['Valor Pago R$']/info['Vendas R$'])),4)*100 if info['Vendas R$']>0 else 0,axis=1)
 
     mensal_df.sort_values('ID Mês',ascending=True,inplace=True) 
 

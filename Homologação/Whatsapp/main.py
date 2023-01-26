@@ -714,8 +714,6 @@ def Whatsapp():
 
                     while contagem==0:
 
-                        print(contagem)
-
                         contagem=len(driver.find_elements(By.CSS_SELECTOR,'p.selectable-text.copyable-text'))
                         time.sleep(1)
 
@@ -807,7 +805,12 @@ def Whatsapp():
 
                             pass
 
+<<<<<<< HEAD
+                        campo=driver.find_element(By.CSS_SELECTOR,'p.selectable-text.copyable-text')
+                        campo.send_keys(Keys.ENTER)
+=======
                         except:
+>>>>>>> b30b9b761657c531ac54f266b3a01f01220108e6
 
                             continue
                     
