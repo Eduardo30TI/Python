@@ -9,6 +9,7 @@ from pathlib import Path
 from datetime import datetime
 from glob import glob
 
+
 #configuração do ambiente
 
 s=Login()
@@ -39,73 +40,21 @@ querys={
     """
 }
 
-#funções principais
 
-@bot.message_handler(commands=['start'])
+@bot.message_handler(content_types=['text'])
 def Main(message):
 
-    bot.send_chat_action(chat_id=message.from_user.id,action='typing')
-    bot.delete_message(chat_id=message.from_user.id,message_id=message.message_id)
+    reply_markup=types.ReplyKeyboardMarkup(resize_keyboard=True)
 
-    mensagem='Informe o código do vendedor para que possamos habilitar o menu:'
-    
-    bot.send_message(chat_id=message.from_user.id,text=mensagem)
-    bot.register_next_step_handler(message=message,callback=Validar)
-        
-    pass
+    reply_markup.add(
 
+        types.InlineKeyboardButton(text='Start',callback_data='/start'),
+        types.InlineKeyboardButton(text='Help',callback_data='/help'),row_width=1
+    )
 
-def Validar(message):
-
-    global id
-
-    df=sql.CriarTabela(kwargs=querys)
-
-    id=str(message.text).strip().upper()
-
-    cont=len(df['Vendedor'].loc[df['Vendedor']['ID Vendedor']==id,'ID Vendedor'].unique().tolist())
-
-    if cont>0:
-
-        msg='Bom dia' if datetime.now().hour<12 else 'Boa tarde'
-
-        nome=str(df['Vendedor'].loc[df['Vendedor']['ID Vendedor']==id,'Vendedor'].values[-1]).title()
-
-        mensagem=f'{msg} <b>{nome}</b> tudo bem, em que posso ajudar?'
-
-        bot.send_chat_action(chat_id=message.from_user.id,action='typing')
-
-        #menu
-        opc={'Foto':'callfoto'}
-
-        markups=types.InlineKeyboardMarkup()
-
-        for op,func in opc.items:
-
-            markups.add(
-
-                types.InlineKeyboardButton(text=op,callback_data=func),row_width=1
-            )
-
-            pass
-
-        bot.send_message(chat_id=message.from_user.id,text=mensagem,reply_markup=markups)
-        
-        pass
-
-    else:
-
-        mensagem=f'Código informado invalido!'
-
-        bot.send_chat_action(chat_id=message.from_user.id,action='typing')
-        bot.send_message(chat_id=message.from_user.id,text=mensagem)
-
-        
-        pass
+    bot.send_message(chat_id=message.from_user.id,text='Seja bem vindo',reply_markup=reply_markup)
 
     pass
-
-def Main()
 
 
 if __name__=='__main__':
