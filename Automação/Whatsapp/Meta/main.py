@@ -26,7 +26,7 @@ querys={
     """
     
     SELECT * FROM netfeira.vw_vendedor
-    WHERE Categoria='CLT' AND [Status do Vendedor]='ATIVO' AND Telefone IS NOT NULL
+    WHERE [Status do Vendedor]='ATIVO'
     
     """,
 
@@ -35,7 +35,7 @@ querys={
     """
     
     SELECT * FROM netfeira.vw_supervisor
-    WHERE NOT Equipe LIKE '%120%'
+    --WHERE NOT Equipe LIKE '%120%'
     
     """,
 
@@ -88,7 +88,7 @@ querys={
 }
 
 def Main(df):
-
+    
     df['Consolidado']=df['Estatico'].groupby(['ID Vendedor'],as_index=False).agg({'Total Venda':'sum'})
 
     df['Consolidado'].rename(columns={'Total Venda':'Faturado'},inplace=True)
@@ -133,58 +133,103 @@ def Main(df):
         
         pass
 
-    df['Vendedor']=df['Vendedor'].merge(df['Supervisor'],on='ID Equipe',how='inner')[['ID Vendedor', 'Vendedor', 'Nome Resumido', 'Equipe','DDD',
-        'Telefone']]
+    df['Vendedor']=df['Vendedor'].merge(df['Supervisor'],on='ID Equipe',how='inner')
 
     df['Vendedor']=df['Vendedor'].merge(df['Meta'],on='ID Vendedor',how='inner')
 
     if(len(df['Vendedor'])>0 and datetime.now().isoweekday() in [1,2,3,4,5]):
 
-        codigos=df['Vendedor']['ID Vendedor'].tolist()
+        col_id={'ID Vendedor':'ID Sup','ID Sup':'ID Gerente','ID Gerente':'ID Gerente'}
 
-        temp_df=pd.DataFrame()
+        col_ddd={'ID Vendedor':'DDD','ID Sup':'DDD Sup','ID Gerente':'DDD Gerente'}
+
+        col_tel={'ID Vendedor':'Telefone','ID Sup':'Telefone Sup','ID Gerente':'Telefone Gerente'}
+
+        col_nome={'ID Vendedor':'Nome Resumido','ID Sup':'Supervisor','ID Gerente':'Gerente'}
 
         whatsapp_df=pd.DataFrame(columns=['Vendedor','DDD','Telefone','Mensagens','Path'])
 
-        for c in codigos:
+        for col1,col2 in col_id.items():
 
-            temp_df=df['Vendedor'].loc[df['Vendedor']['ID Vendedor']==c]
+            temp_df=pd.DataFrame()
 
-            meta=Moeda.FormatarMoeda(temp_df['Meta R$'].sum())
+            codigos=df['Vendedor'].loc[(df['Vendedor']['Categoria']=='CLT')&(~df['Vendedor']['Telefone'].isnull()),col1].unique().tolist()
 
-            total=Moeda.FormatarMoeda(temp_df['Realizado R$'].sum())
+            for c in codigos:
 
-            diferenca=Moeda.FormatarMoeda(temp_df['Dif'].sum())
+                temp_df=df['Vendedor'].loc[df['Vendedor'][col1]==c]
 
-            projecao=Moeda.FormatarMoeda(temp_df['Projeção'].sum())
+                id_sup=temp_df[col2].unique().tolist()[-1]
 
-            perc=Moeda.FormatarMoeda(temp_df['Perc'].sum())
+                ddd=temp_df[col_ddd[col1]].unique().tolist()[-1]
 
-            nome=str(temp_df['Nome Resumido'].tolist()[-1]).title()
+                telefone=temp_df[col_tel[col1]].unique().tolist()[-1]
 
-            ddd=temp_df['DDD'].tolist()[-1]
+                nome=str(temp_df[col_nome[col1]].unique().tolist()[-1]).title()
 
-            telefone=temp_df['Telefone'].tolist()[-1]
+                meta=temp_df['Meta R$'].sum()
 
-            path=''
+                total=temp_df['Realizado R$'].sum()
+                
+                perc=round(total/meta,4)*100
 
-            msg='Bom dia' if datetime.now().hour<12 else 'Boa tarde'
+                meta=Moeda.FormatarMoeda(temp_df['Meta R$'].sum())
 
-            mensagem=f"""
-            
-            {msg};
+                total=Moeda.FormatarMoeda(temp_df['Realizado R$'].sum())                
 
-            {nome} tudo bem, você realizou R$ {total} atingindo {perc}% comparando com a meta de R$ {meta} falta realizar R$ {diferenca}. A projeção para este mês é de R$ {projecao}.
-            
-            """ if (temp_df['Perc'].sum())<100 else f"""
-            
-            {msg};
+                diferenca=Moeda.FormatarMoeda(temp_df['Dif'].sum())
 
-            {nome} tudo bem, venho te parabenizar você realizou R$ {total} atingindo {perc}% comparando com a meta de R$ {meta} com isso atingindo a sua meta.            
-            
-            """
+                projecao=Moeda.FormatarMoeda(temp_df['Projeção'].sum())
 
-            whatsapp_df.loc[len(whatsapp_df)]=[nome,ddd,telefone,mensagem,path]
+                perc=Moeda.FormatarMoeda(perc)
+
+                path=''
+
+                msg='Bom dia' if datetime.now().hour<12 else 'Boa tarde'
+
+                mensagem=f"""
+                
+                {msg};
+
+                {nome} tudo bem, você realizou R$ {total} atingindo {perc}% comparando com a meta de R$ {meta} falta realizar R$ {diferenca}. A projeção para este mês é de R$ {projecao}.
+                
+                """ if (temp_df['Perc'].sum())<100 else f"""
+                
+                {msg};
+
+                {nome} tudo bem, venho te parabenizar você realizou R$ {total} atingindo {perc}% comparando com a meta de R$ {meta} com isso atingindo a sua meta.            
+                
+                """
+                
+                if col1!='ID Gerente':
+                
+                    if c==id_sup:
+
+                        continue
+
+                    if col1=='ID Sup':
+
+                        temp_df[['ID Vendedor','Nome Resumido','Equipe','Meta R$','Realizado R$','Dif','Projeção']].to_excel(f'{nome}.xlsx',index=False,encoding='UTF-8')
+
+                        path=os.path.join(os.getcwd(),f'{nome}.xlsx')
+
+                        pass
+
+                    whatsapp_df.loc[len(whatsapp_df)]=[nome,ddd,telefone,mensagem,path]
+
+                    pass
+
+                else:
+
+                    temp_df[['ID Vendedor','Nome Resumido','Equipe','Meta R$','Realizado R$','Dif','Projeção']].to_excel(f'{nome}.xlsx',index=False,encoding='UTF-8')
+
+                    path=os.path.join(os.getcwd(),f'{nome}.xlsx')
+
+                    whatsapp_df.loc[len(whatsapp_df)]=[nome,ddd,telefone,mensagem,path]
+
+                    pass
+
+                pass
 
             pass
 
