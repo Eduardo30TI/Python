@@ -10,6 +10,8 @@ s=Login()
 
 sql=Query(s.usuario,s.senha,s.database,s.server)
 
+print(s.senha)
+
 links={'Geral':'https://api.powerbi.com/beta/89024f02-ca0e-4816-b5b2-1b5bdf790280/datasets/220441ac-f887-4ef5-9ddb-4d84e0b5c7a0/rows?noSignUpCheck=1&key=hD9mYpvCj%2FbmyoM1biuGj8KpmOXOcbBBumogzXvTUQR9EPmx9rXA5CjBzu7BsBrpnNro0tqFRZzTku1Z3ux6OQ%3D%3D',
 
 'Metas':'https://api.powerbi.com/beta/89024f02-ca0e-4816-b5b2-1b5bdf790280/datasets/1f33007f-ebf4-4493-963e-6b5f330c2fe5/rows?key=iTQ4vg%2BgQnyaTUEKjms3liccmnFSg9KRJWUSYjHJSrlWAI0olDu9152AGNAzQx4EmUwHVTTi9Jl9qx%2Fyl6LAqQ%3D%3D',
