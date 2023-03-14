@@ -10,8 +10,6 @@ s=Login()
 
 sql=Query(s.usuario,s.senha,s.database,s.server)
 
-print(s.senha)
-
 links={'Geral':'https://api.powerbi.com/beta/89024f02-ca0e-4816-b5b2-1b5bdf790280/datasets/220441ac-f887-4ef5-9ddb-4d84e0b5c7a0/rows?noSignUpCheck=1&key=hD9mYpvCj%2FbmyoM1biuGj8KpmOXOcbBBumogzXvTUQR9EPmx9rXA5CjBzu7BsBrpnNro0tqFRZzTku1Z3ux6OQ%3D%3D',
 
 'Metas':'https://api.powerbi.com/beta/89024f02-ca0e-4816-b5b2-1b5bdf790280/datasets/1f33007f-ebf4-4493-963e-6b5f330c2fe5/rows?key=iTQ4vg%2BgQnyaTUEKjms3liccmnFSg9KRJWUSYjHJSrlWAI0olDu9152AGNAzQx4EmUwHVTTi9Jl9qx%2Fyl6LAqQ%3D%3D',
@@ -34,7 +32,7 @@ querys={
 
     SET @DTINICIO=CONCAT(YEAR(@DTFIM),'-',MONTH(@DTFIM),'-01')
 
-    SELECT * FROM netfeira.vw_venda_estatico
+    SELECT * FROM netfeira.vw_targetestatico
     WHERE [Data de Faturamento] BETWEEN @DTINICIO AND @DTFIM
     ORDER BY [Data de Faturamento]
 
@@ -241,8 +239,12 @@ def Main(tabelas_df):
             meta=linha['Meta R$']
             
             faturado=vendas_df['Total Venda'].sum()
+
+            em_aberto=aberto_df['Total Venda'].loc[aberto_df['Situação']=='AB'].sum()
+
+            total=round(faturado+em_aberto,2)
             
-            perc_meta=round(faturado/meta,4)*100
+            perc_meta=round(total/meta,4)*100
             
             carteira=len(tabelas_df['Carteira']['ID Cliente'].loc[(tabelas_df['Carteira']['ID Vendedor']==linha['ID Vendedor'])].unique().tolist())
             
@@ -258,7 +260,7 @@ def Main(tabelas_df):
 
             ticket=round(faturado/pedido,2)
 
-            dif_meta=round(faturado-meta,2)
+            dif_meta=round(total-meta,2)
 
             projecao=round((faturado/trabalhado)*uteis,2)
             
@@ -271,11 +273,7 @@ def Main(tabelas_df):
             realizado=aberto_df['Total Venda'].sum()
             
             meta_diaria=round(meta/uteis,2)
-            
-            em_aberto=aberto_df['Total Venda'].loc[aberto_df['Situação']=='AB'].sum()
-            
-            total=round(faturado+em_aberto,2)
-            
+                                                            
             perc_diario=round(realizado/meta_diaria,4)*100
 
             dif_diario=round(realizado-meta_diaria,2)

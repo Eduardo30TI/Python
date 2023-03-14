@@ -78,6 +78,10 @@ querys={
 def Main(tabelas_df):
 
     vendas_df=pd.DataFrame()
+    
+    aberto_df=pd.DataFrame()
+
+    aberto_df=tabelas_df['Aberto']
 
     vendas_df=tabelas_df['TargetEstatico'].loc[tabelas_df['TargetEstatico']['Tipo de Operação']=='VENDAS']
 
@@ -105,13 +109,17 @@ def Main(tabelas_df):
 
     faturado=round(base_df['Total Venda'].sum(),2)
 
+    real_aberto=round(aberto_df['Total Geral'].loc[aberto_df['Situação']=='AB'].sum(),2)
+
+    total=faturado+real_aberto    
+
     meta=round(tabelas_df['Meta']['Meta R$'].sum(),2)
 
     meta=meta if meta!='' else 0
 
-    perc_meta=round(faturado/meta,4)*100 if meta>0 else 0
+    perc_meta=round(total/meta,4)*100 if meta>0 else 0
 
-    dif_meta=faturado-meta
+    dif_meta=total-meta
 
     ticket=round(faturado/pedido,2)
 
@@ -129,10 +137,6 @@ def Main(tabelas_df):
 
     meta_diaria=round(meta/uteis,2)
 
-    aberto_df=pd.DataFrame()
-
-    aberto_df=tabelas_df['Aberto']
-
     atendimento=len(aberto_df['ID Cliente'].unique().tolist())
 
     realizado=round(aberto_df['Total Geral'].sum(),2)
@@ -140,10 +144,6 @@ def Main(tabelas_df):
     ped_realizado=len(aberto_df['Pedido'].unique().tolist())
 
     perc_diario=round(realizado/meta_diaria,4)*100 if meta_diaria>0 else 0
-
-    real_aberto=round(aberto_df['Total Geral'].loc[aberto_df['Situação']=='AB'].sum(),2)
-
-    total=faturado+real_aberto
 
     kg_real=round(aberto_df['Peso Bruto KG'].sum(),3)
 
@@ -285,6 +285,17 @@ def Equipes(tabelas_df):
 
             vendas_df=pd.DataFrame()
 
+            aberto_df=pd.DataFrame()
+
+            aberto_df=tabelas_df['Aberto']
+
+            aberto_df=aberto_df.merge(tabelas_df['Vendedor'],on='ID Vendedor',how='inner')[['ID Empresa', 'Pedido', 'ID Cliente', 'ID Vendedor', 'Data do Pedido',
+                'SKU', 'Qtde', 'Unid. VDA', 'Qtde VDA', 'Valor VDA', 'Total Venda',
+                'Total AV', 'Total Geral', 'Margem Bruta R$', 'Margem Bruta CRP',
+                'Situação', 'Peso Bruto KG', 'Peso Líquido KG','ID Equipe']]
+
+            aberto_df=aberto_df.loc[aberto_df['ID Equipe']==cod]   
+
             vendas_df=tabelas_df['TargetEstatico'].loc[tabelas_df['TargetEstatico']['Tipo de Operação']=='VENDAS']
 
             vendas_df=vendas_df.merge(tabelas_df['Vendedor'],on='ID Vendedor',how='inner')[['ID Empresa', 'Pedido', 'Nfe', 'ID Cliente', 'ID Vendedor',
@@ -322,6 +333,10 @@ def Equipes(tabelas_df):
 
             faturado=round(base_df['Total Venda'].sum(),2)
 
+            real_aberto=round(aberto_df['Total Geral'].loc[aberto_df['Situação']=='AB'].sum(),2)
+
+            total=faturado+real_aberto            
+
             meta_df=pd.DataFrame()
 
             meta_df=tabelas_df['Meta'].merge(tabelas_df['Vendedor'],on='ID Vendedor',how='inner')[['ID Vendedor','Meta R$','ID Equipe']]
@@ -330,9 +345,9 @@ def Equipes(tabelas_df):
 
             meta=round(meta_df['Meta R$'].sum(),2)
 
-            perc_meta=round(faturado/meta,4)*100 if meta>0 else 0
+            perc_meta=round(total/meta,4)*100 if meta>0 else 0
 
-            dif_meta=faturado-meta
+            dif_meta=total-meta
 
             ticket=round(faturado/pedido,2) if faturado>0 else 0
 
@@ -350,17 +365,6 @@ def Equipes(tabelas_df):
 
             meta_diaria=round(meta/uteis,2)
 
-            aberto_df=pd.DataFrame()
-
-            aberto_df=tabelas_df['Aberto']
-
-            aberto_df=aberto_df.merge(tabelas_df['Vendedor'],on='ID Vendedor',how='inner')[['ID Empresa', 'Pedido', 'ID Cliente', 'ID Vendedor', 'Data do Pedido',
-                'SKU', 'Qtde', 'Unid. VDA', 'Qtde VDA', 'Valor VDA', 'Total Venda',
-                'Total AV', 'Total Geral', 'Margem Bruta R$', 'Margem Bruta CRP',
-                'Situação', 'Peso Bruto KG', 'Peso Líquido KG','ID Equipe']]
-
-            aberto_df=aberto_df.loc[aberto_df['ID Equipe']==cod]
-
             atendimento=len(aberto_df['ID Cliente'].unique().tolist())
 
             realizado=round(aberto_df['Total Geral'].sum(),2)
@@ -368,10 +372,6 @@ def Equipes(tabelas_df):
             ped_realizado=len(aberto_df['Pedido'].unique().tolist())
 
             perc_diario=round(realizado/meta_diaria,4)*100 if meta_diaria>0 else 0
-
-            real_aberto=round(aberto_df['Total Geral'].loc[aberto_df['Situação']=='AB'].sum(),2)
-
-            total=faturado+real_aberto
 
             kg_real=round(aberto_df['Peso Bruto KG'].sum(),3)
 

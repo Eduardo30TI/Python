@@ -1,10 +1,12 @@
 from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
+from selenium.webdriver import ChromeOptions
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
+from pytesseract import pytesseract
+import cv2
 import time
 from Acesso import Login
 from Query import Query
@@ -19,6 +21,8 @@ sql=Query(s.usuario,s.senha,s.database,s.server)
 
 link_base='https://painel.targetmob.com.br/'
 
+path_exe=r'C:\Users\eduardo\AppData\Local\Programs\Tesseract-OCR'
+
 usuario='comercial@demarchibrasil.com.br'
 
 senha='654321'
@@ -29,7 +33,9 @@ querys={
 
     """
     
-    SELECT LTRIM(RTRIM(v.[ID Vendedor])) AS [ID Vendedor],v.[Nome Resumido],s.Equipe,s.Gerente,s.[DDD Gerente],s.[Telefone Gerente]
+    SELECT LTRIM(RTRIM(v.[ID Vendedor])) AS [ID Vendedor],v.[Nome Resumido],s.Equipe,
+	s.Supervisor,s.[DDD Sup],s.[Telefone Sup]
+	,s.Gerente,s.[DDD Gerente],s.[Telefone Gerente]
     FROM netfeira.vw_vendedor v
     INNER JOIN netfeira.vw_supervisor s ON v.[ID Equipe]=s.[ID Equipe]
     WHERE Categoria='CLT' AND [Status do Vendedor]='ATIVO'
@@ -46,13 +52,13 @@ def Main():
 
     whatsapp=pd.DataFrame(columns=['Vendedor','DDD','Telefone','Mensagens','Path'])
 
-    opcao=Options()
-    opcao.add_argument('--start-fullscreen')
-    #opcao.add_argument('--headless')
+    opcao=ChromeOptions()
+    #opcao.add_argument('--start-fullscreen')
+    opcao.add_argument('--headless=new')
 
     service=Service(ChromeDriverManager().install())
     driver=webdriver.Chrome(service=service,options=opcao)
-    #driver.maximize_window()
+    driver.maximize_window()
     driver.get(link)
 
     #usuário
@@ -161,7 +167,7 @@ def Main():
     #df['Vendedor']['ID Vendedor'].unique().tolist()
     for i,c in enumerate(df['Vendedor']['ID Vendedor'].unique().tolist()):
 
-        driver.window_handles[-1]
+        #driver.switch_to.window(driver.window_handles[-1])
 
         if i>0:
 
@@ -222,7 +228,17 @@ def Main():
             click=driver.find_element(By.XPATH,'//*[@id="RDV__tabela-vendedores"]/tr[1]/td[2]/div[1]/a')
             click.click()
 
-            time.sleep(10)
+            #snackbar-container
+            contagem=len(driver.find_elements(By.ID,'btn-legendas'))
+
+            while contagem==0:
+
+                contagem=len(driver.find_elements(By.ID,'btn-legendas'))
+                time.sleep(1)
+
+                pass
+   
+            time.sleep(20)
             
             temp_path=os.path.join(os.getcwd(),'Fotos')
 
@@ -236,6 +252,20 @@ def Main():
 
             driver.save_screenshot(temp_path)
 
+            #box-alerta
+            img_alert=driver.find_element(By.CSS_SELECTOR,'section.box-alerta')
+            path_img=os.path.join(os.getcwd(),f'Alerta {c}.png')
+            img_alert.screenshot(path_img)
+
+            img=cv2.imread(f'Alerta {c}.png')
+
+            pytesseract.tesseract_cmd=path_exe +r'\tesseract.exe'
+            texto=pytesseract.image_to_string(img,lang='por')
+
+            texto=str(texto).strip()
+
+            os.remove(path_img)
+
             #user-info__btn-voltar
             contagem=0
 
@@ -244,22 +274,40 @@ def Main():
                 contagem=len(driver.find_elements(By.ID,'user-info__btn-voltar'))
                 time.sleep(1)
 
+                if contagem>0:
+                    
+                    break
+
                 pass
             
             click=driver.find_element(By.ID,'user-info__btn-voltar')
             click.click()
 
+            col_dd={'DDD Sup':'Telefone Sup','DDD Gerente':'Telefone Gerente'}
+
+            col_nome={'DDD Sup':'Supervisor','DDD Gerente':'Gerente'}
+
             nome=df['Vendedor'].loc[df['Vendedor']['ID Vendedor']==c,'Nome Resumido'].unique().tolist()[-1]
 
-            ddd=df['Vendedor'].loc[df['Vendedor']['ID Vendedor']==c,'DDD Gerente'].unique().tolist()[-1]
+            nome=f'Vendedor(a): {c} - {nome}\nAlertas:\n\n{texto}'
 
-            telefone=df['Vendedor'].loc[df['Vendedor']['ID Vendedor']==c,'Telefone Gerente'].unique().tolist()[-1]
+            print(nome)
+            
+            os.system('cls')
 
-            supervisor=df['Vendedor'].loc[df['Vendedor']['ID Vendedor']==c,'Gerente'].unique().tolist()[-1]
+            print(f'Mapeando Vendedor(a): {nome}')
 
-            nome=f'{c} - {nome}'
+            for key,value in col_dd.items():
+                
+                ddd=df['Vendedor'].loc[df['Vendedor']['ID Vendedor']==c,key].unique().tolist()[-1]
 
-            whatsapp.loc[len(whatsapp)]=[supervisor,ddd,telefone,nome,temp_path]
+                telefone=df['Vendedor'].loc[df['Vendedor']['ID Vendedor']==c,value].unique().tolist()[-1]
+
+                supervisor=df['Vendedor'].loc[df['Vendedor']['ID Vendedor']==c,col_nome[key]].unique().tolist()[-1]
+                
+                whatsapp.loc[len(whatsapp)]=[supervisor,ddd,telefone,nome,temp_path]
+
+                pass
                         
             pass
 
@@ -270,6 +318,8 @@ def Main():
         #break
 
         pass
+
+    whatsapp.sort_values('Vendedor',ascending=True,ignore_index=True,inplace=True)
 
     whatsapp.to_excel('whatsapp.xlsx',index=False,encoding='UTF-8')
 
@@ -282,7 +332,10 @@ if __name__=='__main__':
 
     if not data.isoweekday() in [6,7]:
 
+        #snackbar-container
+
         Main()
+
 
         pass
 

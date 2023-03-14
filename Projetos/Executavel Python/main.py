@@ -383,7 +383,7 @@ def RemoverPasta():
 
 if __name__=='__main__':
 
-    Instalador(kwargs=programas)
+    #Instalador(kwargs=programas)
         
     Main()
 

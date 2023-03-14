@@ -119,7 +119,7 @@ def Analise(carteira_df):
 
             email_to.append(email)
 
-            #email_cc=temp_df[cc].unique().tolist()
+            email_cc=temp_df[cc].unique().tolist()
 
             if(email_to[-1]==email_cc[-1]):
 

@@ -17,7 +17,7 @@ querys={
     """
 
     SELECT * FROM netfeira.vw_metas
-    WHERE [Meta R$]>0
+    --WHERE [Meta R$]>0
     
     """,
 
@@ -53,6 +53,7 @@ querys={
 
     SELECT * FROM netfeira.vw_targetestatico
     WHERE [Data de Faturamento] BETWEEN @DTINICIO AND @DTFIM AND [Tipo de Operação]='VENDAS'
+    ORDER BY [Data de Faturamento]
     
     """,
 
@@ -153,8 +154,8 @@ def Main(df):
 
             temp_df=pd.DataFrame()
 
-            codigos=df['Vendedor'].loc[(df['Vendedor']['Categoria']=='CLT')&(~df['Vendedor']['Telefone'].isnull()),col1].unique().tolist()
-
+            codigos=df['Vendedor'].loc[(df['Vendedor']['Categoria']=='CLT')&(~df['Vendedor']['Telefone'].isnull())&(df['Vendedor']['Meta R$']>0),col1].unique().tolist()
+            
             for c in codigos:
 
                 temp_df=df['Vendedor'].loc[df['Vendedor'][col1]==c]
@@ -171,7 +172,7 @@ def Main(df):
 
                 total=temp_df['Realizado R$'].sum()
                 
-                perc=round(total/meta,4)*100
+                perc=round(total/meta,4)*100 if meta>0 else 100
 
                 meta=Moeda.FormatarMoeda(temp_df['Meta R$'].sum())
 
@@ -181,7 +182,7 @@ def Main(df):
 
                 projecao=Moeda.FormatarMoeda(temp_df['Projeção'].sum())
 
-                perc=Moeda.FormatarMoeda(perc)
+                perc_format=Moeda.FormatarMoeda(perc)
 
                 path=''
 
@@ -191,13 +192,13 @@ def Main(df):
                 
                 {msg};
 
-                {nome} tudo bem, você realizou R$ {total} atingindo {perc}% comparando com a meta de R$ {meta} falta realizar R$ {diferenca}. A projeção para este mês é de R$ {projecao}.
+                {nome} tudo bem, você realizou R$ {total} atingindo {perc_format}% comparando com a meta de R$ {meta} falta realizar R$ {diferenca}. A projeção para este mês é de R$ {projecao}.
                 
-                """ if (temp_df['Perc'].sum())<100 else f"""
+                """ if perc<100 else f"""
                 
                 {msg};
 
-                {nome} tudo bem, venho te parabenizar você realizou R$ {total} atingindo {perc}% comparando com a meta de R$ {meta} com isso atingindo a sua meta.            
+                {nome} tudo bem, venho te parabenizar você realizou R$ {total} atingindo {perc_format}% comparando com a meta de R$ {meta} com isso atingindo a sua meta.            
                 
                 """
                 

@@ -30,17 +30,6 @@ querys={
     AND [Data de Emissão]=DATEADD(DAY,-1,CONVERT(DATETIME,CAST(GETDATE() AS DATE),101))
     AND [Tipo de Operação]<>'OUTROS' 
     
-    """,
-
-    'Vendedor':
-
-    """
-    
-    SELECT *
-    FROM netfeira.vw_vendedor vend
-    INNER JOIN netfeira.vw_supervisor eq ON vend.[ID Equipe]=eq.[ID Equipe]
-    WHERE [Status do Vendedor]='ATIVO' AND Categoria='CLT' AND Telefone IS NOT NULL
-    
     """
 
 }
@@ -64,13 +53,9 @@ def Main(df):
 
             continue
         
-        codigos=df['Vendedor'][col1].loc[(df['Vendedor']['Categoria']=='CLT')&(~df['Vendedor'][col_tel[col1]].isnull())].unique().tolist()
+        codigos=df['Pendente'][col1].loc[(df['Pendente']['Categoria']=='CLT')&(~df['Pendente'][col_tel[col1]].isnull())].unique().tolist()
 
         for c in codigos:
-
-            if len(df['Pendente'].loc[df['Pendente'][col1]==c])<=0:
-
-                continue
 
             temp_df=pd.DataFrame()
 
@@ -144,7 +129,7 @@ def Main(df):
 
                 pass
 
-            writer.close()
+            writer.save()
 
             temp_path=os.path.join(os.getcwd(),f'{nome}.xlsx')
 

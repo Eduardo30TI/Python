@@ -18,7 +18,16 @@ querys={
     
     """
     
+    DECLARE @DTBASE DATETIME, @DTFIM DATETIME, @DTINICIO DATETIME
+
+    SET @DTBASE=CONVERT(DATETIME,CAST(GETDATE() AS date),101)
+
+    SET @DTFIM=@DTBASE
+
+    SET @DTINICIO=DATEADD(DAY,-30,@DTFIM)
+
     SELECT * FROM netfeira.vw_targetestatistico
+    WHERE [Data de Emissão] BETWEEN @DTINICIO AND @DTFIM AND [Tipo de Operação]<>'OUTROS' AND [ID Situação] IN('FA','AB')
     
     """,
     
@@ -39,9 +48,9 @@ def Main(tabelas_df):
 
     vendas_df=tabelas_df['Vendas']
 
-    vendas_df=vendas_df.loc[(vendas_df['Tipo de Operação']!='OUTROS')&(vendas_df['ID Situação'].isin(['FA','AB']))]
+    #vendas_df=vendas_df.loc[(vendas_df['Tipo de Operação']!='OUTROS')&(vendas_df['ID Situação'].isin(['FA','AB']))]
 
-    vendas_df=vendas_df.loc[vendas_df['Data de Emissão'].between(data_inicio,data_atual)]
+    #vendas_df=vendas_df.loc[vendas_df['Data de Emissão'].between(data_inicio,data_atual)]
 
     vendas_df=vendas_df[['SKU','Total Venda']].groupby(['SKU'],as_index=False).sum()
 

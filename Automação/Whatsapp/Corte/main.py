@@ -14,7 +14,7 @@ querys={
     'Faltas':"""
         
         SELECT * FROM netfeira.vw_falta
-        WHERE [Data de Falta]=DATEADD(DAY,-1,CONVERT(DATETIME,CAST(GETDATE() AS DATE),101))
+        WHERE [Data de Falta]=CONVERT(DATETIME,CAST(GETDATE() AS DATE),101)
     
     """,
     
@@ -104,7 +104,7 @@ def Main(tabelas_df):
             
             msg='Bom dia' if datetime.now().hour<12 else 'Boa tarde'
 
-            dt_atual=datetime.strftime(datetime.now().date()-timedelta(days=1),'%d/%m/%Y')
+            dt_atual=datetime.strftime(datetime.now().date(),'%d/%m/%Y')
 
             assunto='Corte de Produto'
 

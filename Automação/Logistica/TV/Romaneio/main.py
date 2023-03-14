@@ -54,7 +54,7 @@ querys={
     'Vendas':
 
     """
-
+    
     SELECT ev.[Total Venda],ev.Úteis,ev.Trabalhado,
     CONVERT(decimal(15,2),(ev.[Total Venda]/ev.Trabalhado)*ev.Úteis) AS Projeção
     FROM (
@@ -73,7 +73,7 @@ querys={
 
     )ev
     
-    """    
+    """
     
 }
 

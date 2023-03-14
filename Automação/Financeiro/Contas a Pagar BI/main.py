@@ -4,7 +4,6 @@ from glob import glob
 import requests
 from Tempo import DataHora
 import pandas as pd
-import datetime 
 
 
 sql=Query('Netfeira','sqlserver','MOINHO','192.168.0.252')
@@ -37,7 +36,11 @@ def Consolidado(tabelas_df):
 
     pago_anterior=round(tabelas_df['Pagar']['Valor Pago R$'].loc[(tabelas_df['Pagar']['Data de Pagamento'].dt.year==data_atual.year)&(tabelas_df['Pagar']['Data de Pagamento'].dt.month==data_atual.month-1)].sum(),2)
 
-    desconto=round(tabelas_df['Pagar']['Desconto R$'].loc[(tabelas_df['Pagar']['Data de Pagamento'].dt.year==data_atual.year)&(tabelas_df['Pagar']['Data de Pagamento'].dt.month==data_atual.month)].sum(),2)
+    desconto=round(tabelas_df['Receber']['Desconto R$'].loc[(tabelas_df['Receber']['Data de Pagamento'].dt.year==data_atual.year)&(tabelas_df['Receber']['Data de Pagamento'].dt.month==data_atual.month)].sum(),2)
+
+    abatimento=round(tabelas_df['Receber']['Abatimento R$'].loc[(tabelas_df['Receber']['Data de Pagamento'].dt.year==data_atual.year)&(tabelas_df['Receber']['Data de Pagamento'].dt.month==data_atual.month)].sum(),2)
+
+    desconto+=abatimento
 
     despesa_rep=round(valor_pago/total,4)*100
     
@@ -79,9 +82,7 @@ def Consolidado(tabelas_df):
         'Margem %':float(margem)
     }
 
-    r=requests.post(url_base,json=temp_dict)
-
-    print(r.status_code)
+    requests.post(url_base,json=temp_dict)
 
     pass
 
@@ -93,7 +94,7 @@ def Mensal(tabelas_df):
 
     data_atual=data.HoraAtual()
 
-    mensal_df=tabelas_df['Pagar'].loc[tabelas_df['Pagar']['Data de Pagamento'].dt.year==data_atual.year] if data_atual.month != 1 else tabelas_df['Pagar'].loc[tabelas_df['Pagar']['Data de Pagamento'].dt.year==data_atual.year -1] 
+    mensal_df=tabelas_df['Pagar'].loc[tabelas_df['Pagar']['Data de Pagamento'].dt.year==data_atual.year]
 
     mensal_df=mensal_df[['Data de Pagamento','Valor Pago R$']].groupby(['Data de Pagamento'],as_index=False).sum()
 
@@ -105,10 +106,10 @@ def Mensal(tabelas_df):
 
     mensal_df['Pago Anterior R$']=mensal_df['ID Mês'].apply(lambda mes:
 
-        tabelas_df['Pagar']['Valor Pago R$'].loc[(tabelas_df['Pagar']['Data de Pagamento'].dt.year==data_atual.year -1)&(tabelas_df['Pagar']['Data de Pagamento'].dt.month==mes-1)].sum() if mes!=1 else tabelas_df['Pagar']['Valor Pago R$'].loc[(tabelas_df['Pagar']['Data de Pagamento'].dt.year==data_atual.year)&(tabelas_df['Pagar']['Data de Pagamento'].dt.month==mes -1)].sum()
+        tabelas_df['Pagar']['Valor Pago R$'].loc[(tabelas_df['Pagar']['Data de Pagamento'].dt.year==data_atual.year)&(tabelas_df['Pagar']['Data de Pagamento'].dt.month==mes-1)].sum() if mes!=1 else tabelas_df['Pagar']['Valor Pago R$'].loc[(tabelas_df['Pagar']['Data de Pagamento'].dt.year==data_atual.year-1)&(tabelas_df['Pagar']['Data de Pagamento'].dt.month==12)].sum()
     )
 
-    mensal_df['Cresc %']=mensal_df.apply(lambda info: round(((info['Valor Pago R$']/info['Pago Anterior R$'])-1),4)*100 if info['Pago Anterior R$']>0 else 0,axis=1)
+    mensal_df['Cresc %']=mensal_df.apply(lambda info: round(((info['Valor Pago R$']/info['Pago Anterior R$'])-1),4)*100,axis=1)
 
     mensal_df['Vendas R$']=mensal_df['ID Mês'].apply(
 
@@ -117,7 +118,7 @@ def Mensal(tabelas_df):
     
     )
 
-    mensal_df['Rep %']=mensal_df.apply(lambda info: round(((info['Valor Pago R$']/info['Vendas R$'])),4)*100 if info['Vendas R$']>0 else 0,axis=1)
+    mensal_df['Rep %']=mensal_df.apply(lambda info: round(((info['Valor Pago R$']/info['Vendas R$'])),4)*100,axis=1)
 
     mensal_df.sort_values('ID Mês',ascending=True,inplace=True) 
 

@@ -17,22 +17,51 @@ querys={
     
     'Faltas':"""
         
-    IF MONTH(GETDATE())=1
+    DECLARE @DTBASE DATETIME,@DTFIM DATETIME, @DTINICIO DATETIME
 
-        SELECT * FROM netfeira.vw_falta
-        WHERE YEAR([Data de Falta])=YEAR(GETDATE())-1 AND MONTH([Data de Falta])=12
+    SET @DTBASE=CONVERT(DATETIME,CAST(GETDATE() AS date),101)
+
+    IF MONTH(GETDATE())=1 AND DAY(GETDATE())=1
+
+        BEGIN
+
+            SET @DTFIM=CONVERT(DATETIME,CAST(
+            CONCAT(YEAR(DATEADD(MONTH,MONTH(@DTBASE)*-1,@DTBASE)),'-',MONTH(DATEADD(MONTH,MONTH(@DTBASE)*-1,@DTBASE)),'-31') AS date),101)
+
+            SET @DTINICIO=CONVERT(DATETIME,CAST(CONCAT(YEAR(@DTFIM),'-01-01') AS date),101)
+
+        END
         
     ELSE
 
-        IF DAY(GETDATE())=1
+        BEGIN
 
-            SELECT * FROM netfeira.vw_falta
-            WHERE YEAR([Data de Falta])=YEAR(GETDATE()) AND MONTH([Data de Falta])=MONTH(GETDATE())-1
+            IF DAY(GETDATE())=1
 
-        ELSE
+                BEGIN
+
+                    SET @DTFIM=DATEADD(DAY,DAY(@DTBASE)*-1,@DTBASE)
                 
-            SELECT * FROM netfeira.vw_falta
-            WHERE [Data de Falta]=CONVERT(DATETIME,CAST(GETDATE() AS DATE),101) 
+                    SET @DTINICIO=CONVERT(DATETIME,CAST(CONCAT(YEAR(@DTFIM),'-',MONTH(@DTFIM),'-01') AS date),101)
+
+                END
+
+            ELSE
+
+                BEGIN
+
+                    SET @DTFIM=@DTBASE
+
+                    SET @DTINICIO=@DTFIM
+
+                END
+
+
+        END
+
+
+    SELECT * FROM netfeira.vw_falta
+    WHERE [Data de Falta] BETWEEN @DTINICIO AND @DTFIM
     
     """,
     
