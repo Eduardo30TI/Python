@@ -24,6 +24,15 @@ querys={
     AND [Última Entrada] BETWEEN DATEADD(DAY,-1,CONVERT(DATETIME,CAST(GETDATE() AS DATE),101)) AND CONVERT(DATETIME,CAST(GETDATE() AS DATE),101)
     ORDER BY SKU
     
+    """,
+
+    'Data':
+
+    """
+    
+    SELECT DATEADD(DAY,-1,CONVERT(DATETIME,CAST(GETDATE() AS DATE),101)) AS [Inicio]
+    ,CONVERT(DATETIME,CAST(GETDATE() AS DATE),101) AS [Fim]
+    
     """
 }
 
@@ -41,15 +50,17 @@ def Main():
 
     path_memoria=os.path.join(os.getcwd(),'Consolidado.csv')
 
-    if not os.path.exists(path_memoria):
+    if os.path.exists(path_memoria)==True:
 
-        df['Custo'].to_csv(path_memoria,index=False,encoding='UTF-8')
+        dt_min=df['Data']['Inicio'].max()
 
-        pass
-
-    else:
+        dt_max=df['Data']['Fim'].max()
 
         temp_df=pd.read_csv(path_memoria,encoding='UTF-8')
+
+        temp_df['Última Entrada']=pd.to_datetime(temp_df['Última Entrada'])
+
+        temp_df=temp_df.loc[temp_df['Última Entrada'].between(dt_min,dt_max)]
 
         df['Custo']['ID']=df['Custo']['SKU'].astype(str) + '' + df['Custo']['Última Entrada'].astype(str)
 
@@ -60,7 +71,7 @@ def Main():
         df['Custo']=df['Custo'].loc[~df['Custo']['ID'].isin(codigos)]
 
         df['Consolidado']=pd.concat([df['Custo'],temp_df],axis=0,ignore_index=True)
-                
+
         pass
 
     if len(df['Custo'])>0:
@@ -143,8 +154,18 @@ def Main():
             m.move(path_orig)
 
             pass
+
+        if not os.path.exists(path_memoria):
+
+            df['Custo'].to_csv(path_memoria,index=False,encoding='UTF-8')
+
+            pass
+
+        else:
         
-        df['Consolidado'][colunas].to_csv(path_memoria,index=False,encoding='UTF-8')
+            df['Consolidado'][colunas].to_csv(path_memoria,index=False,encoding='UTF-8')
+
+            pass
 
         pass
 
