@@ -90,13 +90,12 @@ def JOANIN(produtos:list):
 
             pass
 
-        temp_dict={''}
+        temp_dict={'C16':'Produto','C17':'EAN13', 'F17':'Fabricante','C18':'Peso Líquido KG', 'F18':'Peso Bruto KG', 'C19':'Comprimento STK', 'C20':'Largura STK', 'C21': 'Altura STK', 'C23': 'SKU','C26':'Unid. VDA', 'C27':'Qtde Caixa', 'C28': 'DUN14', 'C29': 'Peso Caixa Bruto','C30': 'Peso Caixa Líquido','C31': 'Comprimento CMP','C32': 'Largura CMP', 'C33':'Altura CMP', 'C47':'NCM', 'C48':'CST VDA'}
         
         #preencher dados dos produtos
         for key,value in temp_dict.items():
             
-            range[key]=str(df['Produtos'][value].max())
-
+            range[key]=str(df['Produtos'].loc[df['Produtos']['Produto']==c,value].max())
             #break
 
             pass        
