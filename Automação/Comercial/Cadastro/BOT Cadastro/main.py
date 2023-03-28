@@ -36,7 +36,7 @@ querys={
 
 }
 
-subjects={'cadastro joanin':'JOANIN','dados dos produtos':'Produtos'}
+subjects={'cadastro joanin':'JOANIN','dados dos produtos':'Produtos','cadastro chocolândia': 'CHOCOLANDIA'}
 
 def Main():
 
@@ -331,8 +331,96 @@ def Produtos(produtos:list):
 
     pass
 
-if __name__=='__main__':
+def CHOCOLANDIA(produtos:list):
 
+    name_arq='Cadastro CHOCOLÂNDIA.xlsx'
+
+    df=sql.CriarTabela(kwargs=querys)
+
+    col_leach='chocolândia'
+
+    path_base=os.path.join(os.getcwd(),'Planilhas','*.xlsx')
+
+    df['Produtos']=df['Produtos'].loc[df['Produtos']['SKU'].isin(produtos)].reset_index()
+    
+    for arq in glob(path_base):
+
+        arq_name=os.path.basename(arq)
+
+        if str(arq_name).lower().find(col_leach)<0:
+
+            continue
+        
+        temp_path=arq
+
+        pass
+
+    sheet=load_workbook(temp_path)
+    sheet.active
+
+    sheet_names=sheet.sheetnames[-1]
+
+    range=sheet[sheet_names]
+
+    for c in df['Produtos']['Fotos'].tolist():
+
+        nome_arq=os.path.basename(c)
+
+        origem=c
+
+        destino=os.path.join(os.getcwd(),'Fotos',nome_arq)
+
+        if not os.path.exists(os.path.dirname(destino)):
+        
+            os.makedirs(os.path.dirname(destino))
+
+            pass
+
+        shutil.copy(origem,destino)
+
+        pass
+
+    if os.path.exists(os.path.dirname(destino)):
+
+        dir_name=os.path.basename(os.path.dirname(destino))
+
+        temp_path=os.path.dirname(destino)
+
+        shutil.make_archive(dir_name,'zip',temp_path)
+
+        shutil.rmtree(os.path.dirname(destino))
+
+        pass
+
+    lista = df['Produtos'].index.tolist()
+    for i,c in enumerate(['SKU','Produto']):
+        indice=3
+        for l in lista:
+            val = df['Produtos'].loc[l,c]
+            range.cell(row=indice,column=i+1,value=val)
+            indice+=1
+
+
+            pass
+
+        pass
+
+    sheet.save(name_arq)
+
+    temp_path=os.path.join(os.getcwd(),name_arq)
+
+    return temp_path
+
+            
+
+    pass
+
+
+
+
+
+if __name__=='__main__':
+        
     Main()
 
     pass
