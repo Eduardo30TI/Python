@@ -185,6 +185,8 @@ def JOANIN(produtos:list):
     path_base=os.path.join(os.getcwd(),'Planilhas','*.xlsx')
 
     df['Produtos']=df['Produtos'].loc[df['Produtos']['SKU'].isin(produtos)]
+
+    print(df['Produtos'])
     
     for arq in glob(path_base):
 
@@ -235,7 +237,7 @@ def JOANIN(produtos:list):
 
         pass
         
-    for i,c in enumerate(df['Produtos']['Produto'].tolist()):
+    for i,c in enumerate(df['Produtos']['SKU'].tolist()):
         
         if i==0:
 
@@ -270,7 +272,7 @@ def JOANIN(produtos:list):
         #preencher dados dos produtos
         for key,value in temp_dict.items():
             
-            range[key]=str(df['Produtos'].loc[df['Produtos']['Produto']==c,value].max())
+            range[key]=str(df['Produtos'].loc[df['Produtos']['SKU']==c,value].max())
             #break
 
             pass
@@ -280,7 +282,7 @@ def JOANIN(produtos:list):
     sheet.save(name_arq)
 
     temp_path=os.path.join(os.getcwd(),name_arq)
-
+    
     return temp_path
 
     pass
@@ -414,9 +416,6 @@ def CHOCOLANDIA(produtos:list):
             
 
     pass
-
-
-
 
 
 if __name__=='__main__':
