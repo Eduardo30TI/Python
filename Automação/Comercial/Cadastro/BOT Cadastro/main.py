@@ -119,12 +119,6 @@ def Main():
             temp_dict={'To':email_to,'CC':email_cc,'Anexo':anexo}
 
             Email.EnviarEmail(corpo=mensagem,assunto=assunto,kwargs=temp_dict)
-
-            for opc in ['.xlsx','.zip']:
-
-                Remover.RemoverArquivo(opc)
-
-                pass
             
             pass
 
@@ -169,6 +163,12 @@ def Main():
         path_move=inbox.Folders[func]
 
         e.move(path_move)
+
+        for opc in ['.xlsx','.zip']:
+
+            Remover.RemoverArquivo(opc)
+
+            pass
 
         pass
 
