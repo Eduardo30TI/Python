@@ -5,6 +5,11 @@ from Acesso import Login
 from Query import Query
 from Email import Email
 from RemoverArquivo import Remover
+import win32com.client as win32
+from datetime import datetime
+from WebTransfer import Web
+import shutil
+from zipfile import ZipFile
 
 s=Login()
 
@@ -31,7 +36,147 @@ querys={
 
 }
 
+subjects={'cadastro joanin':'JOANIN','dados dos produtos':'Produtos'}
+
+def Main():
+
+    outlook=win32.Dispatch('Outlook.Application').GetNameSpace('MAPI')
+
+    inbox=outlook.GetDefaultFolder(6)
+
+    emails=[l for l in inbox.items if str(l.subject).lower() in subjects.keys()]
+
+    col_leach='códigos'
+
+    for e in emails:
+
+        func=subjects[str(e.subject).lower()]
+
+        msg='Bom dia' if datetime.now().hour<12 else 'Boa tarde'
+
+        email_to=[e.sender]
+
+        email_cc=[l for l in str(e.cc).split(';') if str(l).find(inbox.Parent.Name)<0]
+
+        anexo=[]
+
+        assunto=str(e.subject).capitalize()
+
+        try:
+
+            elemento=[l for l in str(e.body).strip().split('\n') if str(l).lower().find(col_leach)>=0][-1]
+
+            elemento=[int(l) for l in elemento.split()[-1].split(',') if str(l).isnumeric()]            
+            
+            temp_path=globals().get(func)(elemento)
+
+            anexo.append(temp_path)
+
+            temp_path=os.path.join(os.getcwd(),'*.zip')
+
+            zips=glob(temp_path)
+
+            if len(zips)>0:
+
+                for zip in zips:
+
+                    w=Web(zip)
+
+                    link_href=w.WebLink()
+
+                    pass
+
+                pass
+
+            mensagem=f"""
+            
+            <p>{msg};</p>
+
+            <p>Segue a sua solicitação conforme solicitado.</p>
+
+            <P>Por favor não responder mensagem automática</P>
+
+            <p>Atenciosamente</p>
+
+            <p>BOT TI</p>
+            
+            """ if len(zips)<=0 else f"""
+            
+            <p>{msg};</p>
+
+            <p>Segue a sua solicitação conforme solicitado. E abaixo segue o link das fotos: </p>
+
+            <p>Link com as fotos: <a href="{link_href}">{link_href}</a></p>
+
+            <P>Por favor não responder mensagem automática</P>
+
+            <p>Atenciosamente</p>
+
+            <p>BOT TI</p>
+            
+            """ 
+
+            temp_dict={'To':email_to,'CC':email_cc,'Anexo':anexo}
+
+            Email.EnviarEmail(corpo=mensagem,assunto=assunto,kwargs=temp_dict)
+
+            for opc in ['.xlsx','.zip']:
+
+                Remover.RemoverArquivo(opc)
+
+                pass
+            
+            pass
+
+        except:
+
+            mensagem=f"""
+
+            <p>{msg};</p>
+
+            <p>Identificamos que na sua solicitação não contém dados para serem analisados. Por favor preencher conforme exemplo abaixo: </p>
+
+            <P><strong>Ex: inserir no corpo do e-mail "códigos:" e os códigos com virgula para que possamos atender a solicitação caso haja mais de um.</strong></P>
+
+            <P>Por favor não responder mensagem automática</P>
+
+            <p>Atenciosamente</p>
+
+            <p>BOT TI</p>
+            
+            """
+
+            temp_dict={'To':email_to,'CC':email_cc,'Anexo':[]}
+
+            Email.EnviarEmail(corpo=mensagem,assunto=assunto,kwargs=temp_dict)            
+
+            pass
+
+        for m in inbox.Folders:
+
+            try:
+                
+                inbox.Folders.Add(func)
+
+                pass
+
+            except:
+
+                continue
+
+            pass
+
+        path_move=inbox.Folders[func]
+
+        e.move(path_move)
+
+        pass
+
+    pass
+
 def JOANIN(produtos:list):
+
+    name_arq='Cadastro JOANIN.xlsx'
 
     df=sql.CriarTabela(kwargs=querys)
 
@@ -40,7 +185,7 @@ def JOANIN(produtos:list):
     path_base=os.path.join(os.getcwd(),'Planilhas','*.xlsx')
 
     df['Produtos']=df['Produtos'].loc[df['Produtos']['SKU'].isin(produtos)]
-
+    
     for arq in glob(path_base):
 
         arq_name=os.path.basename(arq)
@@ -59,7 +204,37 @@ def JOANIN(produtos:list):
     sheet_names=sheet.sheetnames[-1]
 
     range=sheet[sheet_names]
-    
+
+    for c in df['Produtos']['Fotos'].tolist():
+
+        nome_arq=os.path.basename(c)
+
+        origem=c
+
+        destino=os.path.join(os.getcwd(),'Fotos',nome_arq)
+
+        if not os.path.exists(os.path.dirname(destino)):
+        
+            os.makedirs(os.path.dirname(destino))
+
+            pass
+
+        shutil.copy(origem,destino)
+
+        pass
+
+    if os.path.exists(os.path.dirname(destino)):
+
+        dir_name=os.path.basename(os.path.dirname(destino))
+
+        temp_path=os.path.dirname(destino)
+
+        shutil.make_archive(dir_name,'zip',temp_path)
+
+        shutil.rmtree(os.path.dirname(destino))
+
+        pass
+        
     for i,c in enumerate(df['Produtos']['Produto'].tolist()):
         
         if i==0:
@@ -98,17 +273,66 @@ def JOANIN(produtos:list):
             range[key]=str(df['Produtos'].loc[df['Produtos']['Produto']==c,value].max())
             #break
 
-            pass        
+            pass
 
         pass
 
-    sheet.save('Teste.xlsx')
+    sheet.save(name_arq)
+
+    temp_path=os.path.join(os.getcwd(),name_arq)
+
+    return temp_path
 
     pass
 
+def Produtos(produtos:list):
+
+    df=sql.CriarTabela(kwargs=querys)
+
+    df['Produtos']=df['Produtos'].loc[df['Produtos']['SKU'].isin(produtos)]
+
+    df['Produtos'].to_excel('Dados cadastrais.xlsx',index=False)
+
+    temp_path=os.path.join(os.getcwd(),'*.xlsx')
+
+    arquivos=glob(temp_path)
+
+    for c in df['Produtos']['Fotos'].tolist():
+
+        nome_arq=os.path.basename(c)
+
+        origem=c
+
+        destino=os.path.join(os.getcwd(),'Fotos',nome_arq)
+
+        if not os.path.exists(os.path.dirname(destino)):
+        
+            os.makedirs(os.path.dirname(destino))
+
+            pass
+
+        shutil.copy(origem,destino)
+
+        pass
+
+    if os.path.exists(os.path.dirname(destino)):
+
+        dir_name=os.path.basename(os.path.dirname(destino))
+
+        temp_path=os.path.dirname(destino)
+
+        shutil.make_archive(dir_name,'zip',temp_path)
+
+        shutil.rmtree(os.path.dirname(destino))
+
+        pass    
+
+    return arquivos[-1]
+
+    pass
 
 if __name__=='__main__':
 
-    JOANIN([3,8,12])
+    Main()
 
     pass
