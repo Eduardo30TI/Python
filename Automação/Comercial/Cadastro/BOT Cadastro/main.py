@@ -185,8 +185,6 @@ def JOANIN(produtos:list):
     path_base=os.path.join(os.getcwd(),'Planilhas','*.xlsx')
 
     df['Produtos']=df['Produtos'].loc[df['Produtos']['SKU'].isin(produtos)]
-
-    print(df['Produtos'])
     
     for arq in glob(path_base):
 
