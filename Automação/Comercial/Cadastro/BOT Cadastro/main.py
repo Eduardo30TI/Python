@@ -66,7 +66,7 @@ def Main():
 
             elemento=[l for l in str(e.body).strip().split('\n') if str(l).lower().find(col_leach)>=0][-1]
 
-            elemento=[int(l) for l in elemento.split()[-1].split(',') if str(l).isnumeric()]            
+            elemento=[int(l) for l in elemento.split()[-1].split(',') if str(l).isnumeric()]
             
             temp_path=globals().get(func)(elemento)
 
@@ -207,19 +207,27 @@ def JOANIN(produtos:list):
 
     for c in df['Produtos']['Fotos'].tolist():
 
-        nome_arq=os.path.basename(c)
+        try:
 
-        origem=c
+            nome_arq=os.path.basename(c)
 
-        destino=os.path.join(os.getcwd(),'Fotos',nome_arq)
+            origem=c
 
-        if not os.path.exists(os.path.dirname(destino)):
-        
-            os.makedirs(os.path.dirname(destino))
+            destino=os.path.join(os.getcwd(),'Fotos',nome_arq)
+
+            if not os.path.exists(os.path.dirname(destino)):
+            
+                os.makedirs(os.path.dirname(destino))
+
+                pass
+
+            shutil.copy(origem,destino)
 
             pass
 
-        shutil.copy(origem,destino)
+        except:
+
+            continue
 
         pass
 
@@ -332,7 +340,7 @@ def Produtos(produtos:list):
     pass
 
 def CHOCOLANDIA(produtos:list):
-
+    
     name_arq='Cadastro CHOCOLÂNDIA.xlsx'
 
     df=sql.CriarTabela(kwargs=querys)
@@ -363,22 +371,31 @@ def CHOCOLANDIA(produtos:list):
     range=sheet[sheet_names]
 
     for c in df['Produtos']['Fotos'].tolist():
-
-        nome_arq=os.path.basename(c)
-
-        origem=c
-
-        destino=os.path.join(os.getcwd(),'Fotos',nome_arq)
-
-        if not os.path.exists(os.path.dirname(destino)):
         
-            os.makedirs(os.path.dirname(destino))
+        try:
+
+            nome_arq=os.path.basename(c)
+
+            origem=c
+
+            destino=os.path.join(os.getcwd(),'Fotos',nome_arq)
+
+            if not os.path.exists(os.path.dirname(destino)):
+            
+                os.makedirs(os.path.dirname(destino))
+
+                pass
+
+            shutil.copy(origem,destino)
 
             pass
 
-        shutil.copy(origem,destino)
+        except:
+
+            continue
 
         pass
+
 
     if os.path.exists(os.path.dirname(destino)):
 
@@ -400,7 +417,6 @@ def CHOCOLANDIA(produtos:list):
             range.cell(row=indice,column=i+1,value=val)
             indice+=1
 
-
             pass
 
         pass
@@ -409,9 +425,7 @@ def CHOCOLANDIA(produtos:list):
 
     temp_path=os.path.join(os.getcwd(),name_arq)
 
-    return temp_path
-
-            
+    return temp_path    
 
     pass
 
@@ -448,19 +462,27 @@ def BERGAMINI(produtos: list):
 
     for c in df['Produtos']['Fotos'].tolist():
 
-        nome_arq=os.path.basename(c)
+        try:
 
-        origem=c
+            nome_arq=os.path.basename(c)
 
-        destino=os.path.join(os.getcwd(),'Fotos',nome_arq)
+            origem=c
 
-        if not os.path.exists(os.path.dirname(destino)):
-        
-            os.makedirs(os.path.dirname(destino))
+            destino=os.path.join(os.getcwd(),'Fotos',nome_arq)
+
+            if not os.path.exists(os.path.dirname(destino)):
+            
+                os.makedirs(os.path.dirname(destino))
+
+                pass
+
+            shutil.copy(origem,destino)
 
             pass
 
-        shutil.copy(origem,destino)
+        except:
+
+            continue
 
         pass
 
@@ -589,19 +611,27 @@ def ROSSI(produtos: list):
 
     for c in df['Produtos']['Fotos'].tolist():
 
-        nome_arq=os.path.basename(c)
+        try:
 
-        origem=c
+            nome_arq=os.path.basename(c)
 
-        destino=os.path.join(os.getcwd(),'Fotos',nome_arq)
+            origem=c
 
-        if not os.path.exists(os.path.dirname(destino)):
-        
-            os.makedirs(os.path.dirname(destino))
+            destino=os.path.join(os.getcwd(),'Fotos',nome_arq)
+
+            if not os.path.exists(os.path.dirname(destino)):
+            
+                os.makedirs(os.path.dirname(destino))
+
+                pass
+
+            shutil.copy(origem,destino)
 
             pass
 
-        shutil.copy(origem,destino)
+        except:
+
+            continue
 
         pass
 
