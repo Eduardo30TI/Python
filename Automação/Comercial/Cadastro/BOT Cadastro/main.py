@@ -36,7 +36,7 @@ querys={
 
 }
 
-subjects={'cadastro joanin':'JOANIN','dados dos produtos':'Produtos','cadastro chocolândia': 'CHOCOLANDIA'}
+subjects={'cadastro joanin':'JOANIN','dados dos produtos':'Produtos','cadastro chocolândia': 'CHOCOLANDIA','cadastro bergamini':'BERGAMINI','cadastro rossi':'ROSSI'}
 
 def Main():
 
