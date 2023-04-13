@@ -121,7 +121,7 @@ def Main(tabelas_df):
 
     tabelas_df['Contas'].loc[tabelas_df['Contas']['Rep %'].isnull(),'Rep %']=0
 
-    tabelas_df['Contas'].to_excel('Plano de Contas.xlsx',index=False,encoding='UTF-8')
+    tabelas_df['Contas'].to_excel('Plano de Contas.xlsx',index=False)
 
     Enviar()
 

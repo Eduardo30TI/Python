@@ -145,7 +145,7 @@ def ClienteNovo(temp_df,tabela_df):
 
     if(len(temp_df)>0):
 
-        temp_df.to_excel('Clientes Novos.xlsx',index=False,encoding='utf-8')
+        temp_df.to_excel('Clientes Novos.xlsx',index=False)
 
         email_to=['rafael.fabiano@grupobimbo.com']
 
@@ -332,7 +332,7 @@ def ClienteSemCompra(temp_df,tabela_df):
 
     if(len(mes_df)>0):
 
-        mes_df.to_excel('Sem Compra.xlsx',index=False,encoding='utf-8')
+        mes_df.to_excel('Sem Compra.xlsx',index=False)
 
         assunto='Clientes sem compra ARYZTA'
 

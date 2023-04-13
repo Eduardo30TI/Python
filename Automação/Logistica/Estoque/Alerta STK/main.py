@@ -53,7 +53,7 @@ def Main(tabela_df):
 
     if(len(arquivos)==0):
 
-        base_df.to_excel('Estoque.xlsx',index=False,encoding='UTF-8')
+        base_df.to_excel('Estoque.xlsx',index=False)
 
         temp_df=base_df[['SKU','Alerta']]
 
@@ -89,7 +89,7 @@ def Main(tabela_df):
 
     if(len(base_df)>0):
 
-        base_df[['SKU', 'Produto', 'Fabricante','Departamento', 'Seção', 'Categoria', 'Linha','Qtde Saldo','Alerta']].to_excel('Estoque.xlsx',index=False,encoding='UTF-8')
+        base_df[['SKU', 'Produto', 'Fabricante','Departamento', 'Seção', 'Categoria', 'Linha','Qtde Saldo','Alerta']].to_excel('Estoque.xlsx',index=False)
 
         Enviar(tabela_df,base_df)
 

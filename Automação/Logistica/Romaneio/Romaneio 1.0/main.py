@@ -162,9 +162,9 @@ def Analise(tabelas_df):
 
         if(pedido>0):
 
-            motorista.to_excel('Motorista.xlsx',index=False,encoding='ISO-8859-1')
+            motorista.to_excel('Motorista.xlsx',index=False)
 
-            base_df.to_excel('Relação das Entregas.xlsx',index=False,encoding='ISO-8859-1')
+            base_df.to_excel('Relação das Entregas.xlsx',index=False)
 
             temp_path=os.path.join(os.getcwd(),'*.xlsx')
 

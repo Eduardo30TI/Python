@@ -36,7 +36,7 @@ def Analise(tabelas_df):
 
     tabelas_df['Vendedor']=tabelas_df['Vendedor'].loc[(tabelas_df['Vendedor']['Gestor']=='NÃO')&(tabelas_df['Vendedor']['Contagem'].isnull())]
 
-    tabelas_df['Vendedor'].to_excel('Vendedores.xlsx',index=False,encoding='UTF-8')
+    tabelas_df['Vendedor'].to_excel('Vendedores.xlsx',index=False)
 
     tabelas_df['Vendedor']=tabelas_df['Vendedor'].loc[tabelas_df['Vendedor']['Data de Cadastro'].dt.year<ano]
 

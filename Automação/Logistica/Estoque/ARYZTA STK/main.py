@@ -153,7 +153,7 @@ def Analise(tabelas_df):
 
     consolidado_df.rename(columns={'Convertido':'Qtde Média'},inplace=True)
 
-    consolidado_df.to_excel('Consolidado.xlsx',index=False,encoding='ISO-8859-1')
+    consolidado_df.to_excel('Consolidado.xlsx',index=False)
 
     for l in local:
 
@@ -169,7 +169,7 @@ def Analise(tabelas_df):
 
         temp_df.rename(columns={'Convertido':'Qtde Média'},inplace=True)
 
-        temp_df.to_excel(arquivo,index=False,encoding='ISO-8859-1')
+        temp_df.to_excel(arquivo,index=False)
 
         pass
 

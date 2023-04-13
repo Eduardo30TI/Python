@@ -121,7 +121,7 @@ def Main(consolidado_df):
 
     arq=f'Fechamento {ano}{id_mes}.xlsx'
 
-    consolidado_df.to_excel(arq,index=False,encoding='UTF-8')
+    consolidado_df.to_excel(arq,index=False)
 
     temp_path=os.path.join(os.getcwd(),'*.xlsx')
 

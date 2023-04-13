@@ -150,11 +150,11 @@ def Main(tabelas_df):
 
     if(len(tabelas_df['Vendas'])>0):
 
-        produto_df.to_excel('Produtos.xlsx',index=False,encoding='ISO-8859-1')
+        produto_df.to_excel('Produtos.xlsx',index=False)
 
-        linha_df.to_excel('Linha.xlsx',index=False,encoding='ISO-8859-1')
+        linha_df.to_excel('Linha.xlsx',index=False)
 
-        tabelas_df['Vendas'].to_excel('Histórico de Venda.xlsx',index=False,encoding='ISO-8859-1')
+        tabelas_df['Vendas'].to_excel('Histórico de Venda.xlsx',index=False)
 
         dt_min=tabelas_df['Vendas']['Data de Faturamento'].min()
 

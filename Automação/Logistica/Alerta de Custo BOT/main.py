@@ -108,7 +108,7 @@ def Main():
 
         #email_cc=[]
 
-        df['Custo'].to_excel('Alteração de Custo.xlsx',index=False,encoding='UTF-8')
+        df['Custo'].to_excel('Alteração de Custo.xlsx',index=False)
 
         temp_path=os.path.join(os.getcwd(),'*.xlsx')
 

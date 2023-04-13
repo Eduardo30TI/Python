@@ -135,7 +135,7 @@ def Analise(df):
 
     if(len(df)>0):
         
-        df.to_excel('Produtos.xlsx',encoding='ISO-8859-1',index=False)
+        df.to_excel('Produtos.xlsx',index=False)
 
         temp_path=os.path.join(os.getcwd(),'*.xlsx')
 

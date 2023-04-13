@@ -46,7 +46,7 @@ def Analise(tabelas_df):
 
     if(cont_clientes>0):
 
-        carteira_df.to_excel('Carteira.xlsx',index=False,encoding='ISO-8859-1')
+        carteira_df.to_excel('Carteira.xlsx',index=False)
 
         temp_path=os.path.join(os.getcwd(),'*.xlsx')
 

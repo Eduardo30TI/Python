@@ -144,11 +144,11 @@ def Main(tabelas_df):
 
                 if(value!='ID Vendedor'):
 
-                    tabelas_df['Consolidado'].loc[tabelas_df['Consolidado'][value]==codigo[-1]].to_excel('Equipes.xlsx',index=False,encoding='UTF-8')
+                    tabelas_df['Consolidado'].loc[tabelas_df['Consolidado'][value]==codigo[-1]].to_excel('Equipes.xlsx',index=False)
 
                     pass
 
-                tabelas_df['Pedidos'].loc[tabelas_df['Pedidos'][value]==codigo[-1]].to_excel(f'{str(nome[-1]).title()}.xlsx',index=False,encoding='UTF-8')
+                tabelas_df['Pedidos'].loc[tabelas_df['Pedidos'][value]==codigo[-1]].to_excel(f'{str(nome[-1]).title()}.xlsx',index=False)
 
                 temp_path=os.path.join(os.getcwd(),'*.xlsx')
 

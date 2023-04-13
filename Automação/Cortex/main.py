@@ -182,9 +182,9 @@ def Analise(sheet_df):
 
             grupo_df.rename(columns={'Cnpj':'Leads'},inplace=True)
 
-            grupo_df.to_excel(f'Consolidado.xlsx',index=False,encoding='utf-8')
+            grupo_df.to_excel(f'Consolidado.xlsx',index=False)
             
-            temp_df.to_excel(f'Cortex {str(nome).title()}.xlsx',index=False,encoding='utf-8')
+            temp_df.to_excel(f'Cortex {str(nome).title()}.xlsx',index=False)
 
             temp_path=os.path.join(os.getcwd(),'*.xlsx')
 

@@ -199,7 +199,7 @@ def CorpoEmail(clientes,vendas):
        'CEP', 'Endereço', 'Bairro', 'Cidade', 'UF', 'Numero', 'Complemento',
        'Região', 'DDD', 'Contato', 'ID Vendedor',
        'Nome', 'Nome Resumido','Equipe','Supervisor','Primeira Compra',
-       'Última Compra','Dias', 'Total Geral', 'Pedido', 'Comprou']].loc[(clientes[coluna]==env)&(~clientes['Equipe'].str.contains('120'))].to_excel(arq,index=False,encoding='ISO-8859-1')
+       'Última Compra','Dias', 'Total Geral', 'Pedido', 'Comprou']].loc[(clientes[coluna]==env)&(~clientes['Equipe'].str.contains('120'))].to_excel(arq,index=False)
 
                 anexo=glob(temp_path)
 
@@ -223,7 +223,7 @@ def CorpoEmail(clientes,vendas):
        'CEP', 'Endereço', 'Bairro', 'Cidade', 'UF', 'Numero', 'Complemento',
        'Região', 'DDD', 'Contato', 'ID Vendedor',
        'Nome', 'Nome Resumido','Equipe','Supervisor','Primeira Compra',
-       'Última Compra','Dias', 'Total Geral', 'Pedido', 'Comprou']].loc[(clientes[coluna]==env)&(~clientes['Equipe'].str.contains('120'))].to_excel(arq,index=False,encoding='ISO-8859-1')
+       'Última Compra','Dias', 'Total Geral', 'Pedido', 'Comprou']].loc[(clientes[coluna]==env)&(~clientes['Equipe'].str.contains('120'))].to_excel(arq,index=False)
 
                 arq=(f'Metas {str(nome[0]).title()}.xlsx')
 

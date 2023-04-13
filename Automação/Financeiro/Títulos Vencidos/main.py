@@ -90,9 +90,9 @@ def Main(tabelas_df):
 
     grupo_df.sort_values('Saldo R$',ascending=False,ignore_index=True,inplace=True)
 
-    titulos_df.to_excel('Relação de Título.xlsx',index=False,encoding='UTF-8')
+    titulos_df.to_excel('Relação de Título.xlsx',index=False)
 
-    grupo_df.to_excel('Alerta.xlsx',index=False,encoding='UTF-8')
+    grupo_df.to_excel('Alerta.xlsx',index=False)
 
     Enviar(titulos_df)
 
