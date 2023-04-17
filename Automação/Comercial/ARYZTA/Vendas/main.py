@@ -50,7 +50,7 @@ querys={
         END;
 
 
-    SELECT * FROM netfeira.vw_targetestatico
+    SELECT * FROM netfeira.vw_venda_estatico
     WHERE [Tipo de Operação]<>'OUTROS' AND [Data de Faturamento] BETWEEN @DTINICIO AND @DTFIM AND Situação<>'EM ABERTO'
     ORDER BY [Data de Faturamento]    
     
@@ -61,7 +61,7 @@ querys={
     """
     
     SELECT * FROM netfeira.vw_produto
-    WHERE Fabricante='ARYZTA'
+    WHERE Fabricante='BIMBO'
     
     """,
 

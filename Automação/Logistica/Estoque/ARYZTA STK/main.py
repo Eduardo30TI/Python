@@ -32,7 +32,7 @@ querys={
 
     SET @DTINICIO=DATEADD(DAY,-31,@DTFIM)
 
-    SELECT * FROM netfeira.vw_targetestatico
+    SELECT * FROM netfeira.vw_venda_estatico
     WHERE [Data de Faturamento] BETWEEN @DTINICIO AND @DTFIM
     ORDER BY [Data de Faturamento]
     
@@ -52,18 +52,17 @@ def Base(tabela_df):
 
     tabela_df['TargetEstatico']=tabela_df['TargetEstatico'].loc[(tabela_df['TargetEstatico']['Tipo de Operação']=='VENDAS')]
 
-    tabela_df['TargetEstatico']=tabela_df['TargetEstatico'].merge(tabela_df['Produto'],on='SKU',how='inner')[['Data de Emissão', 'Data de Faturamento', 'Pedido', 'Nfe', 'ID Empresa',
+    tabela_df['TargetEstatico']=tabela_df['TargetEstatico'].merge(tabela_df['Produto'],on='SKU',how='inner')[['Data de Emissão', 'Data de Faturamento', 'Pedido', 'NFe', 'ID Empresa',
         'ID Cliente', 'ID Vendedor', 'Tipo de Pedido', 'Tipo de Operação',
-        'Tabelas', 'SKU','Cód. Fabricante', 'Produto', 'Status', 'Fabricante','Qtde', 'Unid. VDA', 'Qtde VDA', 'Valor VDA',
+        'Tabelas', 'SKU','Cód. Fabricante', 'Produto', 'Status', 'Fabricante','Qtde', 'Unid. VDA', 'Qtde VDA', 'Valor de VDA',
         'Total Geral', 'Total Venda', 'Comissão R$', 'Margem Bruta R$',
-        'Cad Vendedor', 'Situação', 'Peso Bruto KG', 'Peso Líquido KG','Unid. CMP','Fator CMP']]
+        'Situação', 'Peso Bruto KG', 'Peso Líquido KG','Unid. CMP','Fator CMP']]
 
     vendas_df=pd.DataFrame()
 
     vendas_df=tabela_df['TargetEstatico']
 
-    vendas_df=vendas_df[['Data de Faturamento','SKU','Produto','Unid. CMP','Fator CMP','Qtde']].loc[vendas_df['Fabricante'].str.contains('ARYZTA')].groupby(['Data de Faturamento','SKU','Produto','Unid. CMP','Fator CMP'],as_index=False).sum()
-
+    vendas_df=vendas_df[['Data de Faturamento','SKU','Produto','Unid. CMP','Fator CMP','Qtde']].loc[vendas_df['Fabricante'].str.contains('BIMBO')].groupby(['Data de Faturamento','SKU','Produto','Unid. CMP','Fator CMP'],as_index=False).sum()
     valores=[]
 
     for indice,linha in vendas_df.iterrows():
@@ -76,7 +75,7 @@ def Base(tabela_df):
         
         else:
             
-            res=int(linha['Qtde']/linha['Fator CMP'])
+            res=int(linha['Qtde']/linha['Fator CMP']) if linha['Fator CMP']>0 else 0
             
             pass
         
@@ -93,6 +92,7 @@ def Base(tabela_df):
     vendas_df=vendas_df[['SKU','Convertido']].loc[vendas_df['Convertido']>0]
 
     return vendas_df
+   
 
     pass
 
