@@ -139,8 +139,124 @@ callback_dict={
 @bot.message_handler(commands=[])
 def Main(message):
 
+    CommandsMenu()
+
+    global comando
+
+    comando=message.text
+        
+    msg='Bom dia' if datetime.now().hour<12 else 'Boa tarde'
+
+    chat_id=message.from_user.id
+
+    bot.delete_message(chat_id=chat_id,message_id=message.message_id)
+    bot.send_chat_action(chat_id=chat_id,action='typing',timeout=espera)
+
+    temp_path=Path(__file__)
+    temp_path=temp_path.parent.joinpath('Memória')
+
+    Path(temp_path).mkdir(exist_ok=True)
+        
+    path_arq=os.path.join(temp_path.joinpath('Consolidado.xlsx'))
+
+    arquivo=glob(path_arq)
+
+    if len(arquivo)<=0:
+
+        temp_df=pd.DataFrame(columns=['ChatID','Código'])
+
+        temp_df.to_excel(path_arq,index=False,sheet_name='Chat')
+
+        pass
+
+    temp_df=pd.read_excel(path_arq,sheet_name='Chat')
+
+    count=len(temp_df.loc[temp_df['ChatID']==chat_id])
+
+    if count<=0:
+        
+        bot.send_message(chat_id=chat_id,text=f'{msg} por questões de segurança me informe seu código de vendedor interno para que possamos continuar.')
+
+        bot.register_next_step_handler(message=message,callback=ValidacaoID)        
+
+        pass
+
+    else:
+
+        if message.text=='/start':
+
+            pass
+
+        else:
+
+            func=start[str(message.text)]
+                            
+            globals().get(func)(message)
+
+            pass
+
+        pass
 
 
+    pass
+
+def ValidacaoID(message):
+
+    chat_id=message.from_user.id
+
+    codigo=str(message.text).upper().strip()
+
+    temp_path=Path(__file__)
+
+    temp_path=os.path.join(temp_path.parent.joinpath('Memória','Consolidado.xlsx'))
+
+    temp_df=pd.read_excel(temp_path)
+
+    df=sql.GetDados(querys=querys,colunas=['Vendedor'])
+
+    count=len(df['Vendedor'].loc[df['Vendedor']['ID Vendedor']==codigo])
+    
+    bot.send_chat_action(chat_id=chat_id,action='typing',timeout=espera)
+    #bot.delete_message(chat_id=chat_id,message_id=message.message_id)
+
+    if count>0:
+
+        id_temp=temp_df.loc[temp_df['Código']==codigo,'ChatID'].tolist()
+
+        if len(id_temp)>0:
+
+            bot.send_message(chat_id=chat_id,text='Identificamos que o código desse usuário já está sendo usando em outro aparelho. Caso você desconheça essa informação entrar em contato com o administrador da plataforma.')
+
+            bot.register_next_step_handler(message=message,callback=ValidacaoID)
+
+            pass
+
+        else:
+
+            bot.send_chat_action(chat_id=message.from_user.id,action='typing')
+            #bot.delete_message(chat_id=message.from_user.id,message_id=message.message_id)
+
+            nome=str(df['Vendedor'].loc[df['Vendedor']['ID Vendedor']==codigo,'Nome Resumido'].tolist()[-1]).title()
+
+            temp_df.loc[len(temp_df)]=[chat_id,codigo]
+
+            temp_df.to_excel(temp_path,index=False,sheet_name='Chat')
+
+            bot.send_message(chat_id=chat_id,text=f'Seja bem vindo {nome}.')
+
+            CommandsMenu()
+
+            pass
+
+        pass
+
+    else:
+
+        bot.send_message(chat_id=chat_id,text='Usuário informado não existe no sistema!')
+
+        bot.register_next_step_handler(message=message,callback=ValidacaoID)
+
+        pass
 
     pass
 
