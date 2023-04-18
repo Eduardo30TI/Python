@@ -48,7 +48,7 @@ querys={
 
     """
     
-    WITH TabEntrega AS (
+     WITH TabEntrega AS (
 
         SELECT DISTINCT tp_entrega,
         CASE WHEN tp_entrega='TR' THEN 'TRANSPORTADORA'
@@ -69,6 +69,7 @@ querys={
                 ROW_NUMBER()OVER(PARTITION BY e.cd_emp,e.cd_clien,e.nu_ped ORDER BY e.seq_evento) AS seq
                 FROM evento e
                 INNER JOIN fila f ON e.cd_fila=f.cd_fila
+				WHERE YEAR(e.dt_criacao)= YEAR(GETDATE())
 
             )a
 
@@ -78,12 +79,12 @@ querys={
     )
 
     SELECT CONVERT(DATETIME,CAST(ped.dt_cad AS DATE),101) AS [Data do Pedido],ped.dt_cad AS [Data e Hora],emp.nome_fant AS [Empresa],
-    i.nu_ped AS [Pedido],tp.[Estatística Comercial],tp.[Tipo de Pedido],ped.cd_clien AS [ID Cliente],cli.[Nome Fantasia],cli.Matriz,
+    i.nu_ped AS [Pedido],tp.[Estatística Comercial],tp.[Tipo de Pedido],ped.cd_clien AS [ID Cliente],cli.[CNPJ],cli.[Nome Fantasia],cli.Matriz,
     it.cd_prod AS SKU,prod.Produto,prod.Fabricante,it.seq AS [Seq],
     it.unid_vda AS [Unid. VDA],it.qtde_unid_vda AS [Qtde VDA],
     it.vl_venda AS [Total Venda],
     CASE WHEN it.situacao='FA' THEN 'FATURADO' ELSE 'EM ABERTO' END AS [Situação]
-    ,ev.des_fila AS [Fila],en.st_entrega AS [Situação de Entrega]
+    ,ev.des_fila AS [Fila],en.st_entrega AS [Situação de Entrega], r.situacao
     FROM it_rom i
     INNER JOIN romaneio r ON i.nu_rom=r.nu_rom AND r.situacao<>'EN'
     INNER JOIN ped_vda ped ON i.nu_ped=ped.nu_ped AND i.cd_emp=ped.cd_emp
@@ -94,7 +95,7 @@ querys={
     INNER JOIN netfeira.vw_cliente cli ON ped.cd_clien=cli.[ID Cliente]
     INNER JOIN netfeira.vw_produto prod ON it.cd_prod=prod.SKU
     INNER JOIN netfeira.vw_tpped tp ON ped.tp_ped=tp.[ID Tipo]
-    AND NOT it.situacao IN('CA','DV')
+    AND it.situacao IN('FA','AB')
     
     """
 
@@ -109,20 +110,23 @@ commands_dict={
 }
 
 start={
-    '/titulos': 'Opcao'
-      
+    '/titulos': 'Opcao',
+    '/pedidos': 'Historico'
+
 
 }
 
 funcoes={
-    '/titulos': 'Opcao'
+    '/titulos': 'Opcao',
+    '/pedidos': 'Historico'
 
 
 }
 
 #função usando para opções
 col_dict={
-    '/titulos': ['Receber']
+    '/titulos': ['Receber'],
+    '/pedidos': ['Historico','Cliente']
 
 }
 
@@ -144,7 +148,7 @@ callback_dict={
 }
 
 
-@bot.message_handler(commands=['start','titulos'])
+@bot.message_handler(commands=['start','titulos','pedidos'])
 def Main(message):
 
     CommandsMenu()
@@ -238,17 +242,22 @@ def call_handler(message):
 
             df['Receber']['CNPJ']=df['Receber']['CNPJ'].astype(str)
 
-            df['Receber']=df['Receber'].loc[(df['Receber']['CNPJ']==codigo)&(df['Receber']['Status do Título']==val)]
+            if len(df['Receber'])>0:
 
-            qtd_titulos=Moeda.Numero(len(df['Receber']['Título'].unique().tolist()))
+                df['Receber']=df['Receber'].loc[(df['Receber']['CNPJ']==codigo)&(df['Receber']['Status do Título']==val)]
 
-            soma=Moeda.FormatarMoeda(df['Receber']['Valor Líquido'].sum())
+                qtd_titulos=Moeda.Numero(len(df['Receber']['Título'].unique().tolist()))
 
-            nome=str(df['Cliente'].loc[df['Cliente']['CNPJ']==codigo,'Nome Fantasia'].tolist()[-1]).title()
+                soma=Moeda.FormatarMoeda(df['Receber']['Valor Líquido'].sum())
 
-            mensagem = f'{msg}, {nome} identifiquei <strong>{qtd_titulos}</strong> títulos no nosso sistema, totalizando <strong>R$ {soma}</strong>.'
+                nome=str(df['Cliente'].loc[df['Cliente']['CNPJ']==codigo,'Nome Fantasia'].tolist()[-1]).title()
 
-            bot.send_message(chat_id=chat_id,text=mensagem)
+                mensagem = f'{msg}, {nome} identifiquei <strong>{qtd_titulos}</strong> títulos no nosso sistema, totalizando <strong>R$ {soma}</strong>.'
+
+                bot.send_message(chat_id=chat_id,text=mensagem)
+            else:
+
+                bot.send_message(chat_id=chat_id,text='Não encontrei nenhuma informação no sistema.')
 
             pass
 
@@ -315,6 +324,51 @@ def ValidacaoID(message):
 
     pass
 
+def Historico(message):
+
+    chat_id=message.from_user.id
+
+    temp_df=Memoria(chat_id=chat_id)
+
+    temp_df['Código']=temp_df['Código'].astype(str)
+
+    codigo=temp_df['Código'].tolist()[-1]
+
+    df=sql.GetDados(querys=querys,colunas=col_dict[comando])
+
+    for c in ['Historico','Cliente']:
+
+        df[c]['CNPJ']=df[c]['CNPJ'].astype(str)
+
+        df[c]=df[c].loc[df[c]['CNPJ']==codigo]
+
+    msg='Bom dia' if datetime.now().hour<12 else 'Boa tarde'
+
+    if len(df['Historico'])>0:
+
+        dt_ult = datetime.strftime(df['Cliente']['Última Compra'].max(),'%d/%m/%Y')
+
+        qtd_ped = len(df['Historico']['Pedido'].unique().tolist())
+
+        bot.send_chat_action(chat_id=message.from_user.id,action='typing')
+
+        mensagem = f'{msg}, você tem <strong>{qtd_ped}</strong> pedidos em aberto, e sua última compra foi em <strong>{dt_ult}</strong>.'
+
+        bot.send_message(chat_id=chat_id,text=mensagem)
+
+        pass
+
+    else:
+
+        bot.send_chat_action(chat_id=message.from_user.id,action='typing')
+        bot.send_message(chat_id=chat_id,text='Não encontrei nenhuma informação no sistema.')
+
+        pass
+
+
+    pass
+
+
 def Opcao(message):
 
     chat_id=message.from_user.id
@@ -325,7 +379,7 @@ def Opcao(message):
 
     df=sql.GetDados(querys=querys,colunas=col_dict[comando])
 
-    lista=df[tab_dict[comando]][col_name[comando]].unique().tolist()
+    lista=df[tab_dict[comando]][col_name[comando]].unique().tolist() 
 
     markup=InlineKeyboardMarkup(lista,call_back=callback_dict[comando])
 
