@@ -101,42 +101,50 @@ querys={
 }
 
 
-commands_dict={
-      
+commands_dict={ 
+    '/titulos': 'Títulos em aberto',
+    '/pedidos': 'Acompanhamento de pedidos'
 
+    
 }
 
 start={
+    '/titulos': 'Opcao'
       
 
 }
 
 funcoes={
+    '/titulos': 'Opcao'
 
 
 }
 
 #função usando para opções
 col_dict={
+    '/titulos': ['Receber']
 
 }
 
 tab_dict={
+    '/titulos': 'Receber'
 
 }
 
 col_name={
+    '/titulos': 'Status do Título'
 
 
 }
 
-callback_dict={
+callback_dict={ 
+    '/titulos': 1
    
 
 }
 
 
-@bot.message_handler(commands=[])
+@bot.message_handler(commands=['start','titulos'])
 def Main(message):
 
     CommandsMenu()
@@ -175,7 +183,7 @@ def Main(message):
 
     if count<=0:
         
-        bot.send_message(chat_id=chat_id,text=f'{msg} por questões de segurança me informe seu código de vendedor interno para que possamos continuar.')
+        bot.send_message(chat_id=chat_id,text=f'{msg} por questões de segurança me informe seu CPF ou CNPJ (sem pontos e sem barra) interno para que possamos continuar.')
 
         bot.register_next_step_handler(message=message,callback=ValidacaoID)        
 
@@ -200,6 +208,52 @@ def Main(message):
 
     pass
 
+
+@bot.callback_query_handler(func=lambda call:True)
+def call_handler(message):
+
+    chat_id=message.from_user.id
+    
+    conteudo=str(message.data)
+
+    msg='Bom dia' if datetime.now().hour<12 else 'Boa tarde'
+
+    id=int(conteudo[:conteudo.find('/')])
+
+    val=str(conteudo[conteudo.find('/')+1:])
+
+    bot.delete_message(chat_id=chat_id,message_id=message.message.message_id)
+    bot.send_chat_action(chat_id=chat_id,action='typing',timeout=espera)
+
+    match id:
+        case 1:
+
+            temp_df=Memoria(chat_id=chat_id)
+
+            temp_df['Código']=temp_df['Código'].astype(str)
+
+            codigo=temp_df['Código'].tolist()[-1]
+            
+            df=sql.GetDados(querys=querys,colunas=['Cliente','Receber'])
+
+            df['Receber']['CNPJ']=df['Receber']['CNPJ'].astype(str)
+
+            df['Receber']=df['Receber'].loc[(df['Receber']['CNPJ']==codigo)&(df['Receber']['Status do Título']==val)]
+
+            qtd_titulos=Moeda.Numero(len(df['Receber']['Título'].unique().tolist()))
+
+            soma=Moeda.FormatarMoeda(df['Receber']['Valor Líquido'].sum())
+
+            nome=str(df['Cliente'].loc[df['Cliente']['CNPJ']==codigo,'Nome Fantasia'].tolist()[-1]).title()
+
+            mensagem = f'{msg}, {nome} identifiquei <strong>{qtd_titulos}</strong> títulos no nosso sistema, totalizando <strong>R$ {soma}</strong>.'
+
+            bot.send_message(chat_id=chat_id,text=mensagem)
+
+            pass
+
+    pass
+
 def ValidacaoID(message):
 
     chat_id=message.from_user.id
@@ -212,17 +266,18 @@ def ValidacaoID(message):
 
     temp_df=pd.read_excel(temp_path)
 
-    df=sql.GetDados(querys=querys,colunas=['Vendedor'])
+    df=sql.GetDados(querys=querys,colunas=['Cliente'])
 
-    count=len(df['Vendedor'].loc[df['Vendedor']['ID Vendedor']==codigo])
+    df['Cliente']['CNPJ']=df['Cliente']['CNPJ'].astype(str)
+
+    count=len(df['Cliente'].loc[df['Cliente']['CNPJ']==codigo])
     
     bot.send_chat_action(chat_id=chat_id,action='typing',timeout=espera)
     #bot.delete_message(chat_id=chat_id,message_id=message.message_id)
 
     if count>0:
-
+        temp_df['Código']=temp_df['Código'].astype(str)
         id_temp=temp_df.loc[temp_df['Código']==codigo,'ChatID'].tolist()
-
         if len(id_temp)>0:
 
             bot.send_message(chat_id=chat_id,text='Identificamos que o código desse usuário já está sendo usando em outro aparelho. Caso você desconheça essa informação entrar em contato com o administrador da plataforma.')
@@ -236,7 +291,7 @@ def ValidacaoID(message):
             bot.send_chat_action(chat_id=message.from_user.id,action='typing')
             #bot.delete_message(chat_id=message.from_user.id,message_id=message.message_id)
 
-            nome=str(df['Vendedor'].loc[df['Vendedor']['ID Vendedor']==codigo,'Nome Resumido'].tolist()[-1]).title()
+            nome=str(df['Cliente'].loc[df['Cliente']['CNPJ']==codigo,'Nome Fantasia'].tolist()[-1]).title()
 
             temp_df.loc[len(temp_df)]=[chat_id,codigo]
 
@@ -399,7 +454,7 @@ def Start():
     pass
 
 if __name__=='__main__':
-
+    Start()
     
 
     pass
