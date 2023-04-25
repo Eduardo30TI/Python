@@ -18,7 +18,7 @@ querys={
 
     """
     
-    SELECT * FROM netfeira.vw_targetestatistico
+    SELECT * FROM netfeira.vw_estatistico
     WHERE [ID Situação]='AB' AND [Data de Entrega]=CONVERT(DATETIME,CAST(GETDATE() AS DATE),101) 
     AND [Data de Emissão]=DATEADD(DAY,-1,CONVERT(DATETIME,CAST(GETDATE() AS DATE),101))
     AND [Tipo de Operação]<>'OUTROS'    

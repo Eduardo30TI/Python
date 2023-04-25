@@ -26,7 +26,7 @@ querys={
 
     SET @DTINICIO=DATEADD(DAY,-30,@DTFIM)
 
-    SELECT * FROM netfeira.vw_targetestatistico
+    SELECT * FROM netfeira.vw_estatistico
     WHERE [Data de Emissão] BETWEEN @DTINICIO AND @DTFIM AND [Tipo de Operação]<>'OUTROS' AND [ID Situação] IN('FA','AB')
     
     """,

@@ -21,7 +21,7 @@ querys={
 	sup.[ID Sup],sup.Supervisor,sup.[DDD Sup],sup.[Telefone Sup],sup.[ID Gerente],sup.Gerente,sup.[DDD Gerente],
 	sup.[Telefone Gerente],
 	prod.SKU,prod.Produto,prod.Fabricante,[Unid. VDA],[Qtde. VDA],[Valor VDA],[Total Venda]
-	FROM netfeira.vw_targetestatistico vda
+	FROM netfeira.vw_estatistico vda
 	INNER JOIN netfeira.vw_cliente cli ON vda.[ID Cliente]=cli.[ID Cliente]
 	INNER JOIN netfeira.vw_vendedor vend ON vda.[ID Vendedor]=vend.[ID Vendedor]
 	INNER JOIN netfeira.vw_supervisor sup ON vend.[ID Equipe]=sup.[ID Equipe]

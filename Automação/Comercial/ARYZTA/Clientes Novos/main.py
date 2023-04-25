@@ -20,7 +20,7 @@ querys={
     
     """
     
-    SELECT * FROM netfeira.vw_targetestatistico
+    SELECT * FROM netfeira.vw_estatistico
     WHERE [Situação] IN ('FATURADO','EM ABERTO') AND [Tipo de Operação] IN ('VENDAS','BONIFICAÇÃO','AMOSTRA')    
     
     """,
