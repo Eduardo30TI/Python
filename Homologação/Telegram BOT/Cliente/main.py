@@ -12,7 +12,9 @@ import os
 from pathlib import Path
 import pandas as pd
 
-TOKEN=config('TOKEN')
+#TOKEN_PROD
+#TOKEN
+TOKEN=config('TOKEN_PROD')
 
 bot=telebot.TeleBot(token=TOKEN,parse_mode='HTML')
 
@@ -48,54 +50,15 @@ querys={
 
     """
     
-     WITH TabEntrega AS (
+    SELECT * FROM netfeira.vw_etapa_ped
+    
+    """,
 
-        SELECT DISTINCT tp_entrega,
-        CASE WHEN tp_entrega='TR' THEN 'TRANSPORTADORA'
-        WHEN tp_entrega='RE' THEN 'RETIRA' WHEN tp_entrega='EN' THEN 'ENTREGA' END AS st_entrega
-        FROM ped_vda
+    'MIX':
 
-    ),
-
-    TabEvento AS (
-
-        SELECT * FROM (
-
-            SELECT a.seq_evento,a.cd_emp,a.cd_clien,a.dt_criacao,a.nu_ped,a.des_fila,a.seq,
-            MAX(a.seq)OVER(PARTITION BY a.cd_emp,a.cd_clien,a.nu_ped ORDER BY a.seq DESC) AS seq_max
-            FROM (
-
-                SELECT e.seq_evento,e.cd_emp,e.cd_clien,e.dt_criacao,e.nu_ped,f.des_fila,
-                ROW_NUMBER()OVER(PARTITION BY e.cd_emp,e.cd_clien,e.nu_ped ORDER BY e.seq_evento) AS seq
-                FROM evento e
-                INNER JOIN fila f ON e.cd_fila=f.cd_fila
-				WHERE YEAR(e.dt_criacao)= YEAR(GETDATE())
-
-            )a
-
-        )b
-        WHERE b.seq=b.seq_max
-
-    )
-
-    SELECT CONVERT(DATETIME,CAST(ped.dt_cad AS DATE),101) AS [Data do Pedido],ped.dt_cad AS [Data e Hora],emp.nome_fant AS [Empresa],
-    i.nu_ped AS [Pedido],tp.[Estatística Comercial],tp.[Tipo de Pedido],ped.cd_clien AS [ID Cliente],cli.[CNPJ],cli.[Nome Fantasia],cli.Matriz,
-    it.cd_prod AS SKU,prod.Produto,prod.Fabricante,it.seq AS [Seq],
-    it.unid_vda AS [Unid. VDA],it.qtde_unid_vda AS [Qtde VDA],
-    it.vl_venda AS [Total Venda],
-    CASE WHEN it.situacao='FA' THEN 'FATURADO' ELSE 'EM ABERTO' END AS [Situação]
-    ,ev.des_fila AS [Fila],en.st_entrega AS [Situação de Entrega], r.situacao
-    FROM it_rom i
-    INNER JOIN romaneio r ON i.nu_rom=r.nu_rom AND r.situacao<>'EN'
-    INNER JOIN ped_vda ped ON i.nu_ped=ped.nu_ped AND i.cd_emp=ped.cd_emp
-    INNER JOIN it_pedv it ON ped.cd_emp=it.cd_emp AND ped.nu_ped=it.nu_ped
-    INNER JOIN TabEvento ev ON ped.cd_emp=ev.cd_emp AND ped.cd_clien=ev.cd_clien AND ped.nu_ped=ev.nu_ped
-    INNER JOIN TabEntrega en ON ped.tp_entrega=en.tp_entrega
-    INNER JOIN empresa emp ON ped.cd_emp=emp.cd_emp AND emp.ativo=1
-    INNER JOIN netfeira.vw_cliente cli ON ped.cd_clien=cli.[ID Cliente]
-    INNER JOIN netfeira.vw_produto prod ON it.cd_prod=prod.SKU
-    INNER JOIN netfeira.vw_tpped tp ON ped.tp_ped=tp.[ID Tipo]
-    AND it.situacao IN('FA','AB')
+    """
+    
+    SELECT * FROM netfeira.vw_mixcliente
     
     """
 
@@ -104,21 +67,24 @@ querys={
 
 commands_dict={ 
     '/titulos': 'Títulos em aberto',
-    '/pedidos': 'Acompanhamento de pedidos'
+    '/pedidos': 'Acompanhamento de pedidos',
+    '/mix':'MIX do cliente'
 
     
 }
 
 start={
     '/titulos': 'Opcao',
-    '/pedidos': 'Historico'
+    '/pedidos': 'Historico',
+    '/mix':'MIX'
 
 
 }
 
 funcoes={
     '/titulos': 'Opcao',
-    '/pedidos': 'Historico'
+    '/pedidos': 'Historico',
+    '/mix':'MIX'
 
 
 }
@@ -126,7 +92,8 @@ funcoes={
 #função usando para opções
 col_dict={
     '/titulos': ['Receber'],
-    '/pedidos': ['Historico','Cliente']
+    '/pedidos': ['Historico','Cliente'],
+    '/mix':['MIX','Cliente']
 
 }
 
@@ -148,7 +115,7 @@ callback_dict={
 }
 
 
-@bot.message_handler(commands=['start','titulos','pedidos'])
+@bot.message_handler(commands=['start','titulos','pedidos','mix'])
 def Main(message):
 
     CommandsMenu()
@@ -212,7 +179,6 @@ def Main(message):
 
     pass
 
-
 @bot.callback_query_handler(func=lambda call:True)
 def call_handler(message):
 
@@ -234,25 +200,21 @@ def call_handler(message):
 
             temp_df=Memoria(chat_id=chat_id)
 
-            temp_df['Código']=temp_df['Código'].astype(str)
-
             codigo=temp_df['Código'].tolist()[-1]
             
             df=sql.GetDados(querys=querys,colunas=['Cliente','Receber'])
 
-            df['Receber']['CNPJ']=df['Receber']['CNPJ'].astype(str)
+            df['Receber']=df['Receber'].loc[(df['Receber']['ID Cliente']==codigo)&(df['Receber']['Status do Título']==val)]
 
             if len(df['Receber'])>0:
-
-                df['Receber']=df['Receber'].loc[(df['Receber']['CNPJ']==codigo)&(df['Receber']['Status do Título']==val)]
 
                 qtd_titulos=Moeda.Numero(len(df['Receber']['Título'].unique().tolist()))
 
                 soma=Moeda.FormatarMoeda(df['Receber']['Valor Líquido'].sum())
 
-                nome=str(df['Cliente'].loc[df['Cliente']['CNPJ']==codigo,'Nome Fantasia'].tolist()[-1]).title()
+                nome=str(df['Cliente'].loc[df['Cliente']['ID Cliente']==codigo,'Nome Fantasia'].tolist()[-1]).title()
 
-                mensagem = f'{msg}, {nome} identifiquei <strong>{qtd_titulos}</strong> títulos no nosso sistema, totalizando <strong>R$ {soma}</strong>.'
+                mensagem = f'{msg}, {nome} identifiquei <strong>{qtd_titulos}</strong> títulos no nosso sistema, totalizando <strong>R$ {soma}</strong>. Lembrando que caso tenha feito o pagamento as informações serão atualizada em 7 dias úteis em nosso sistema.'
 
                 bot.send_message(chat_id=chat_id,text=mensagem)
             else:
@@ -279,14 +241,17 @@ def ValidacaoID(message):
 
     df['Cliente']['CNPJ']=df['Cliente']['CNPJ'].astype(str)
 
-    count=len(df['Cliente'].loc[df['Cliente']['CNPJ']==codigo])
+    codigo=df['Cliente'].loc[df['Cliente']['CNPJ']==codigo,'ID Cliente'].unique().tolist()[-1]
+
+    count=len(df['Cliente'].loc[df['Cliente']['ID Cliente']==codigo])
     
     bot.send_chat_action(chat_id=chat_id,action='typing',timeout=espera)
     #bot.delete_message(chat_id=chat_id,message_id=message.message_id)
 
     if count>0:
-        temp_df['Código']=temp_df['Código'].astype(str)
+
         id_temp=temp_df.loc[temp_df['Código']==codigo,'ChatID'].tolist()
+        
         if len(id_temp)>0:
 
             bot.send_message(chat_id=chat_id,text='Identificamos que o código desse usuário já está sendo usando em outro aparelho. Caso você desconheça essa informação entrar em contato com o administrador da plataforma.')
@@ -300,7 +265,7 @@ def ValidacaoID(message):
             bot.send_chat_action(chat_id=message.from_user.id,action='typing')
             #bot.delete_message(chat_id=message.from_user.id,message_id=message.message_id)
 
-            nome=str(df['Cliente'].loc[df['Cliente']['CNPJ']==codigo,'Nome Fantasia'].tolist()[-1]).title()
+            nome=str(df['Cliente'].loc[df['Cliente']['ID Cliente']==codigo,'Nome Fantasia'].tolist()[-1]).title()
 
             temp_df.loc[len(temp_df)]=[chat_id,codigo]
 
@@ -328,46 +293,99 @@ def Historico(message):
 
     chat_id=message.from_user.id
 
-    temp_df=Memoria(chat_id=chat_id)
+    bot.send_message(chat_id=chat_id,text='Aguarde ...')
 
-    temp_df['Código']=temp_df['Código'].astype(str)
+    temp_df=Memoria(chat_id=chat_id)
 
     codigo=temp_df['Código'].tolist()[-1]
 
     df=sql.GetDados(querys=querys,colunas=col_dict[comando])
 
-    for c in ['Historico','Cliente']:
+    bot.send_chat_action(chat_id=chat_id,action='typing',timeout=espera)
 
-        df[c]['CNPJ']=df[c]['CNPJ'].astype(str)
-
-        df[c]=df[c].loc[df[c]['CNPJ']==codigo]
-
-    msg='Bom dia' if datetime.now().hour<12 else 'Boa tarde'
-
+    df['Historico']=df['Historico'].loc[df['Historico']['ID Cliente']==codigo]
+    
     if len(df['Historico'])>0:
 
-        dt_ult = datetime.strftime(df['Cliente']['Última Compra'].max(),'%d/%m/%Y')
+        nome=str(df['Historico'].loc[df['Historico']['ID Cliente']==codigo,'Nome Fantasia'].tolist()[-1]).title()
 
-        qtd_ped = len(df['Historico']['Pedido'].unique().tolist())
+        msg='Bom dia' if datetime.now().hour<12 else 'Boa tarde'
 
-        bot.send_chat_action(chat_id=message.from_user.id,action='typing')
+        total=Moeda.FormatarMoeda(df['Historico']['Total Venda'].sum())
 
-        mensagem = f'{msg}, você tem <strong>{qtd_ped}</strong> pedidos em aberto, e sua última compra foi em <strong>{dt_ult}</strong>.'
+        dt_max=DataConverte(df['Historico']['Data de Faturamento'].max())
+
+        dt_etapa=DataConverte(df['Historico']['Data da Etapa'].max(),hora=True)
+
+        etapa=str(df['Historico']['Etapa'].unique().tolist()[-1]).capitalize()
+
+        df['Consolidado']=df['Historico'].groupby(['Produto'],as_index=False).agg({'Qtde':'sum'})
+
+        df['Consolidado']['Info']=df['Consolidado'].apply(lambda info: f'{str(info["Produto"]).capitalize()} - Qtde: {Moeda.Numero(info["Qtde"])} unidade(s)',axis=1)
+
+        mensagem=f'{msg} <strong>{nome}</strong> identifiquei que sua última compra foi {dt_max} no valor de R$ {total}.\n\nStatus do pedido: {etapa} - Data e hora: {dt_etapa}\n.'
+
+        mensagem+='\n.'.join([l for l in df['Consolidado']['Info'].unique().tolist()])
 
         bot.send_message(chat_id=chat_id,text=mensagem)
 
         pass
 
+
     else:
 
-        bot.send_chat_action(chat_id=message.from_user.id,action='typing')
-        bot.send_message(chat_id=chat_id,text='Não encontrei nenhuma informação no sistema.')
+        bot.send_message(chat_id=chat_id,text='Não encontrei nunhum pedido realizado em nosso sistema.')
+
+        pass
+
+    pass
+
+def MIX(message):
+
+    chat_id=message.from_user.id
+
+    bot.send_message(chat_id=chat_id,text='Aguarde ...')
+
+    temp_df=Memoria(chat_id=chat_id)
+
+    codigo=temp_df['Código'].tolist()[-1]
+
+    df=sql.GetDados(querys=querys,colunas=col_dict[comando])
+
+    bot.send_chat_action(chat_id=chat_id,action='typing',timeout=espera)
+
+    df['MIX']=df['MIX'].loc[df['MIX']['ID Cliente']==codigo]
+    
+    if len(df['MIX'])>0:
+
+        nome=str(df['Cliente'].loc[df['Cliente']['ID Cliente']==codigo,'Nome Fantasia'].tolist()[-1]).title()
+
+        msg='Bom dia' if datetime.now().hour<12 else 'Boa tarde'
+
+        mix=Moeda.Numero(df['MIX']['SKU'].count())
+
+        mensagem=f'{msg} <strong>{nome}</strong> identifiquei que você já comprou em nosso sistema {mix} produto(s).\n'
+
+        for l in df['MIX']['Positivado'].unique().tolist():
+
+            mensagem+=f'\n{str(l).capitalize()}:\n.'
+
+            mensagem+='\n.'.join([str(l).capitalize() for l in df['MIX'].loc[df['MIX']['Positivado']==l,'Produto'].unique().tolist()])
+
+            pass
+
+        bot.send_message(chat_id=chat_id,text=mensagem)
 
         pass
 
 
-    pass
+    else:
 
+        bot.send_message(chat_id=chat_id,text='Não encontrei nunhum pedido realizado em nosso sistema.')
+
+        pass
+
+    pass
 
 def Opcao(message):
 
@@ -452,9 +470,11 @@ def InlineKeyboardMarkup(lista: list,call_back: int):
 
     pass
 
-def DataConverte(data):
+def DataConverte(data,hora=False):
 
-    return datetime.strftime(data,'%d/%m/%Y')
+    data=datetime.strftime(data,'%d/%m/%Y') if hora==False else datetime.strftime(data,'%d/%m/%Y %H:%M:%S')
+
+    return data
 
     pass
 
@@ -508,7 +528,7 @@ def Start():
     pass
 
 if __name__=='__main__':
+
     Start()
-    
 
     pass

@@ -21,6 +21,7 @@ from selenium.webdriver.common.action_chains import ActionChains
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.support.wait import WebDriverWait
 import pyttsx3
+from PIL import Image
 
 #TOKEN_PROD - produção
 #TOKEN - homologação
@@ -188,6 +189,16 @@ querys={
         
     """,
 
+    'Fotos':
+
+
+    """
+    
+    SELECT * FROM netfeira.vw_produto
+    WHERE Fotos IS NOT NULL AND Fotos<>''
+    
+    """,
+
     'Vendedor':
 
     """
@@ -238,6 +249,7 @@ querys={
         PIVOT(SUM([Total Venda]) FOR Situação IN([FATURADO],[DEVOLUÇÃO],[DEVOLUÇÃO PARCIAL],[CANCELADO]))b
 
     )c
+    ORDER BY c.[ID Mês]
     
     """,
 
@@ -246,7 +258,7 @@ querys={
     """
     
     SELECT *
-    FROM netfeira.vw_targetestatistico
+    FROM netfeira.vw_estatistico
     WHERE [Data de Emissão]=CONVERT(DATETIME,CAST(GETDATE() AS DATE),101) AND [Tipo de Operação]='VENDAS'
     
     """,
@@ -280,7 +292,7 @@ querys={
 
     """
 
-    SELECT * FROM netfeira.vw_targetestatistico
+    SELECT * FROM netfeira.vw_estatistico
     WHERE YEAR([Data de Faturamento])=YEAR(GETDATE()) AND [Tipo de Operação]<>'OUTROS' AND [ID Situação] IN('FA','AB')
     
     """,
@@ -513,7 +525,7 @@ def call_handler(message):
 
                 pass
 
-            if len(lista)>0:
+            if len(lista)>1:
 
                 markup=InlineKeyboardMarkup(lista,call_back=id)
 
@@ -532,7 +544,9 @@ def call_handler(message):
 
                 nome=str(df['Vendedor'].loc[df['Vendedor']['ID Vendedor']==codigo,'Nome Resumido'].tolist()[-1]).title()
 
-                vendedor=str(df['Vendedor'].loc[df['Vendedor']['ID Vendedor']==val,'Nome Resumido'].tolist()[-1]).title()
+                id=df['Vendedor'].loc[df['Vendedor']['Nome Resumido']==val,'ID Vendedor'].tolist()[-1]
+
+                vendedor=val.title()
 
                 bot.send_chat_action(chat_id=chat_id,action='typing',timeout=espera)
                 #bot.delete_message(chat_id=chat_id,message_id=message.message.message_id)
@@ -542,14 +556,22 @@ def call_handler(message):
                     df[c]['ID Vendedor']=df[c]['ID Vendedor'].apply(RemoverEspaco)
 
                     pass
+                
+                df['Carteira']=df['Carteira'].loc[df['Carteira']['ID Vendedor']==id]
 
-                df['Carteira']=df['Carteira'].loc[df['Carteira']['ID Vendedor']==val]
+                if len(df['Carteira'])>0:
 
-                df['Carteira'].to_excel('Carteira.xlsx',index=False)
+                    df['Carteira'].to_excel('Carteira.xlsx',index=False)
 
-                with open('Carteira.xlsx','rb') as file:
+                    with open('Carteira.xlsx','rb') as file:
 
-                    bot.send_document(chat_id=chat_id,document=file,caption=f'{msg} {nome}, segue a relação da carteira do vendedor: <strong>{vendedor}</strong>')
+                        bot.send_document(chat_id=chat_id,document=file,caption=f'{msg} {nome}, segue a relação da carteira do vendedor: <strong>{vendedor}</strong>')
+
+                        pass
+
+                else:
+
+                    bot.send_message(chat_id=chat_id,text=f'{nome} não consegui encontrar nenhuma informação do vendedor: {val}')
 
                     pass
 
@@ -857,21 +879,38 @@ def call_handler(message):
 
             df=sql.GetDados(querys=querys,colunas=['Tabelas','Vendedor'])
 
-            codigos=df['Vendedor'].loc[df['Vendedor'][col]==codigo,'ID Vendedor'].tolist()
+            for c in ['Tabelas','Vendedor']:
 
-            df['Tabelas']['ID Vendedor']=df['Tabelas']['ID Vendedor'].apply(RemoverEspaco)
+                df[c]['ID Vendedor']=df[c]['ID Vendedor'].apply(RemoverEspaco)
+                    
+                pass
+
+            codigos=df['Vendedor'].loc[df['Vendedor'][col]==codigo,'ID Vendedor'].unique().tolist()
+
+            nome=str(df['Vendedor'].loc[df['Vendedor']['ID Vendedor']==codigo,'Nome Resumido'].tolist()[-1]).title()
 
             df['Tabelas']=df['Tabelas'].loc[(df['Tabelas']['ID Vendedor'].isin(codigos))&((df['Tabelas']['Tabela']==val))]
 
-            df['Tabelas']=df['Tabelas'][['Tabela','SKU', 'Produto', 'Fabricante','Categoria', 'Linha', 'Unid. VDA', 'Peso Liquido', 'Fator CX','Peso Liquido Caixa', 'Preço VDA','Desc Máx', 'Valor C/Desc']].drop_duplicates()            
-
-            df['Tabelas'].to_excel(f'{val}.xlsx',index=False)
+            df['Tabelas']=df['Tabelas'][['Tabela','SKU', 'Produto', 'Fabricante','Categoria', 'Linha', 'Unid. VDA', 'Peso Liquido', 'Fator CX','Peso Liquido Caixa', 'Preço VDA','Desc Máx', 'Valor C/Desc']].drop_duplicates()
 
             bot.send_chat_action(chat_id=chat_id,action='typing',timeout=espera)
 
-            with open(f'{val}.xlsx','rb') as file:
+            if len(df['Tabelas'])>0:        
 
-                bot.send_document(chat_id=chat_id,document=file)
+                df['Tabelas'].to_excel(f'{val}.xlsx',index=False)
+                
+                with open(f'{val}.xlsx','rb') as file:
+
+                    bot.send_document(chat_id=chat_id,document=file)
+
+                    pass
+
+                pass
+
+
+            else:
+
+                bot.send_message(chat_id=chat_id,text=f'{msg} {nome} você não tem autorização para acessar a tabela: <strong>{val.lower()}</strong>.')
 
                 pass
 
@@ -1614,9 +1653,9 @@ def Foto(message):
 
     codigos=[int(l) for l in str(message.text).split(',') if str(l).isnumeric()]
 
-    df=sql.GetDados(querys=querys,colunas=['Vendedor','Produtos'])
+    df=sql.GetDados(querys=querys,colunas=['Vendedor','Fotos'])
 
-    df['Produtos']=df['Produtos'].loc[(df['Produtos']['SKU'].isin(codigos))&(df['Produtos']['Fotos']!='')]
+    df['Fotos']=df['Fotos'].loc[(df['Fotos']['SKU'].isin(codigos))&(df['Fotos']['Fotos'].notnull())]
 
     temp_df=Memoria(chat_id=chat_id)
 
@@ -1624,58 +1663,70 @@ def Foto(message):
 
     nome=str(df['Vendedor'].loc[df['Vendedor']['ID Vendedor']==codigo,'Nome Resumido'].tolist()[-1]).title()
 
-    erros=[l for l in codigos if not l in df['Produtos']['SKU'].unique().tolist()]
+    erros=[l for l in codigos if not l in df['Fotos']['SKU'].unique().tolist()]
 
     erros=','.join([str(l) for l in erros])
 
-    if len(df['Produtos'])>0:
+    if len(df['Fotos'])>0:
 
         #bot.delete_message(chat_id=message.from_user.id,message_id=message.message_id)
-        bot.send_chat_action(chat_id=chat_id,action='typing')
+        bot.send_chat_action(chat_id=chat_id,action='typing',timeout=espera)
 
-        #criar a pasta
-        temp_path=Path(__file__)
+        path_base=Path(__file__).parent.joinpath('Fotos')
+        path_base.mkdir(exist_ok=True)
 
-        temp_path=temp_path.parent.joinpath('Fotos')
-        temp_path.mkdir(exist_ok=True)
+        mensagem=f'Obs: Não encontramos na relação esses códigos com as fotos: <strong>{erros}</strong>'
+        temp=[]
+        for arq in df['Fotos']['Fotos'].unique().tolist():
 
-        #mover as fotos
-        for arq in df['Produtos']['Fotos'].unique().tolist():
+            arq_name=os.path.basename(arq)
+
+            path_destino=os.path.join(path_base,arq_name)
+
+            shutil.copy(arq,path_destino)
+
+            with Image.open(arq) as img:
+
+                width,heigth=img.size
+
+                new_width=2240
+                
+                if width>new_width:
+                    
+                    new_height=Calc_img(width,heigth,new_width)
+
+                    new_img=img.resize((new_width,new_height),Image.LANCZOS)
+                    new_img.save(path_destino)
+                    
+                    pass                
+
+                pass
 
             try:
 
-                arq_name=Path(arq).name
-            
-                path_destino=temp_path.joinpath(arq_name)
+                with open(path_destino,'rb') as file:
 
-                shutil.copy(arq,path_destino)
+                    temp.append(types.InputMediaPhoto(
+
+                        file.read()
+                    ))
 
                 pass
 
             except:
 
-                continue
+                continue            
 
             pass
 
-        if os.path.exists(os.path.join(temp_path))==True:
+        bot.send_media_group(chat_id=chat_id,media=temp)
+        shutil.rmtree(os.path.join(path_base))
 
-            shutil.make_archive(temp_path.name,'zip',os.path.join(temp_path))
+        if len(erros)>0:
 
-            shutil.rmtree(temp_path)
+            bot.send_message(chat_id=chat_id,text=mensagem)
 
-            zip_path=os.path.join(os.getcwd(),f'{temp_path.name}.zip')
-
-            zips=Web(zip_path)
-
-            link=zips.WebLink()
-            
             pass
-
-        mensagem=f'{msg};\n{nome} tudo bem?\n\nSegue o link das fotos: {link}' if len(erros)<=0 else f'{msg};\n{nome} tudo bem?\n\nSegue o link das fotos: {link}.\n\nObs: Não encontramos na relação esses códigos com as fotos: <strong>{erros}</strong>'
-
-        bot.send_chat_action(chat_id=chat_id,action='typing')
-        bot.send_message(chat_id=chat_id,text=mensagem)
 
         pass
 
@@ -1687,8 +1738,6 @@ def Foto(message):
         bot.send_message(chat_id=chat_id,text=f'{msg} {nome} tudo bem! não identificamos nenhum produto com esse código com foto: <strong>{erros}</strong>')
 
         pass
-
-    Remover.RemoverArquivo('.zip')
 
     pass
 
@@ -1974,59 +2023,74 @@ def Custo(message):
 
     codigo=temp_df['Código'].tolist()[-1]
 
+    temp_dict=Colunas()
+
+    col=temp_dict[codigo]
+
     nome=str(df['Vendedor'].loc[df['Vendedor']['ID Vendedor']==codigo,'Nome Resumido'].tolist()[-1]).title()
-
-    erros=[l for l in codigos if not l in df['Custo']['SKU'].unique().tolist()]
-
-    erros=','.join([str(l) for l in erros])
 
     bot.send_chat_action(chat_id=chat_id,action='typing',timeout=espera)
 
-    if len(df['Custo'])>0:
+    if col=='ID Vendedor':
 
-        if len(df['Custo'])==1:
-
-            produto=df['Custo']['Produto'].tolist()[-1]
-
-            unid=df['Custo']['Unid. CMP'].tolist()[-1]
-
-            vl_custo=df['Custo']['Atual C/ST'].sum()
-
-            vl_ant=df['Custo']['Anterior C/ST'].sum()
-
-            perc=df['Custo']['Perc %'].sum()
-
-            dif=df['Custo']['Dif R$'].sum()
-
-            mensagem=f'{msg};\n{nome} tudo bem?\n\nO custo do item <strong>{produto}</strong>:\nUnidade de Compra: {unid}\nCusto Atual: R$ {Moeda.FormatarMoeda(vl_custo)}\nCusto Anterior: R$ {Moeda.FormatarMoeda(vl_ant)}\nPercentual de Ajuste: {Moeda.FormatarMoeda(perc)}%\nDiferença: R$ {Moeda.FormatarMoeda(dif)}' if len(erros)<=0 else f'{msg};\n{nome} tudo bem?\n\nO custo do item <strong>{produto}</strong>:\nUnidade de Compra: {unid}\nCusto Atual: R$ {Moeda.FormatarMoeda(vl_custo)}\nCusto Anterior: R$ {Moeda.FormatarMoeda(vl_ant)}\nPercentual de Ajuste: {Moeda.FormatarMoeda(perc)}%\nDiferença: R$ {Moeda.FormatarMoeda(dif)}\n\nObs: Não encontramos na relação esses códigos: <strong>{erros}</strong'
-            
-            bot.send_message(chat_id=chat_id,text=mensagem)
-
-            pass
-
-        else:
-
-            df['Custo'].to_excel('Custo dos produtos.xlsx',index=False)
-
-            with open('Custo dos produtos.xlsx','rb') as file:
-            
-                mensagem=f'{msg};\n{nome} tudo bem?\n\nSegue o arquivo com os dados dos produtos.' if len(erros)<=0 else f'{msg};\n{nome} tudo bem?\n\nSegue o arquivo com os dados dos produtos.\n\nObs: Não encontramos na relação esses códigos: <strong>{erros}</strong>'
-                
-                bot.send_document(chat_id=chat_id,document=file,caption=mensagem)
-
-                pass
-
-            pass
-
-        Remover.RemoverArquivo('.xlsx')
-
+        bot.send_message(chat_id=chat_id,text=f'{msg} {nome} você não tem autorização para fazer essa consulta.')
 
         pass
 
-
     else:
+        
+        erros=[l for l in codigos if not l in df['Custo']['SKU'].unique().tolist()]
 
-        bot.send_message(chat_id=chat_id,text=f'{msg} {nome} tudo bem! não identificamos nenhum produto com esses códigos: <strong>{erros}</strong>')
+        erros=','.join([str(l) for l in erros])
+        
+        if len(df['Custo'])>0:
+
+            if len(df['Custo'])==1:
+
+                produto=df['Custo']['Produto'].tolist()[-1]
+
+                unid=df['Custo']['Unid. CMP'].tolist()[-1]
+
+                vl_custo=df['Custo']['Atual C/ST'].sum()
+
+                vl_ant=df['Custo']['Anterior C/ST'].sum()
+
+                perc=df['Custo']['Perc %'].sum()
+
+                dif=df['Custo']['Dif R$'].sum()
+
+                mensagem=f'{msg};\n{nome} tudo bem?\n\nO custo do item <strong>{produto}</strong>:\nUnidade de Compra: {unid}\nCusto Atual: R$ {Moeda.FormatarMoeda(vl_custo)}\nCusto Anterior: R$ {Moeda.FormatarMoeda(vl_ant)}\nPercentual de Ajuste: {Moeda.FormatarMoeda(perc)}%\nDiferença: R$ {Moeda.FormatarMoeda(dif)}' if len(erros)<=0 else f'{msg};\n{nome} tudo bem?\n\nO custo do item <strong>{produto}</strong>:\nUnidade de Compra: {unid}\nCusto Atual: R$ {Moeda.FormatarMoeda(vl_custo)}\nCusto Anterior: R$ {Moeda.FormatarMoeda(vl_ant)}\nPercentual de Ajuste: {Moeda.FormatarMoeda(perc)}%\nDiferença: R$ {Moeda.FormatarMoeda(dif)}\n\nObs: Não encontramos na relação esses códigos: <strong>{erros}</strong'
+                
+                bot.send_message(chat_id=chat_id,text=mensagem)
+
+                pass
+
+            else:
+
+                df['Custo'].to_excel('Custo dos produtos.xlsx',index=False)
+
+                with open('Custo dos produtos.xlsx','rb') as file:
+                
+                    mensagem=f'{msg};\n{nome} tudo bem?\n\nSegue o arquivo com os dados dos produtos.' if len(erros)<=0 else f'{msg};\n{nome} tudo bem?\n\nSegue o arquivo com os dados dos produtos.\n\nObs: Não encontramos na relação esses códigos: <strong>{erros}</strong>'
+                    
+                    bot.send_document(chat_id=chat_id,document=file,caption=mensagem)
+
+                    pass
+
+                pass
+            
+
+            Remover.RemoverArquivo('.xlsx')
+
+
+            pass
+
+
+        else:
+
+            bot.send_message(chat_id=chat_id,text=f'{msg} {nome} tudo bem! não identificamos nenhum produto com esses códigos: <strong>{erros}</strong>')
+
+            pass
 
         pass
 
@@ -2375,6 +2439,12 @@ def Voice(mensagem):
 def DataConverte(data):
 
     return datetime.strftime(data,'%d/%m/%Y')
+
+    pass
+
+def Calc_img(width,height,new_width):
+
+    return round(new_width*(height/width))
 
     pass
 

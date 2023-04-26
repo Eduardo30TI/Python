@@ -21,6 +21,7 @@ from selenium.webdriver.common.action_chains import ActionChains
 from webdriver_manager.chrome import ChromeDriverManager
 import pyttsx3
 from Acentos import Acentuacao
+from PIL import Image
 
 #TOKEN_PROD de produção
 #TOKEN de teste
@@ -93,7 +94,7 @@ funcoes={
 col_dict={
 
     '/alerta':['Estoque','Usuario'],
-    '/foto':['Produtos','Usuario'],
+    '/foto':['Fotos','Usuario'],
     '/fichatecnica': ['Produtos','Usuario'],
     '/dadosprodutos': ['Produtos','Usuario'],
     '/custo':['Custo','Usuario'],
@@ -148,6 +149,16 @@ querys={
         
     SELECT * FROM netfeira.vw_prod_dados
         
+    """,
+
+    'Fotos':
+
+
+    """
+    
+    SELECT * FROM netfeira.vw_produto
+    WHERE Fotos IS NOT NULL AND Fotos<>''
+    
     """,
 
     'Usuario':
@@ -833,7 +844,7 @@ def Foto(message):
 
     df=sql.GetDados(querys=querys,colunas=col_dict[comando])
 
-    df['Produtos']=df['Produtos'].loc[(df['Produtos']['SKU'].isin(codigos))&(df['Produtos']['Fotos']!='')]
+    df['Fotos']=df['Fotos'].loc[(df['Fotos']['SKU'].isin(codigos))]
 
     temp_df=Memoria(chat_id=chat_id)
 
@@ -843,58 +854,70 @@ def Foto(message):
 
     nome=str(df[tab_user].loc[df[tab_user]['ID Usuário']==codigo,'Nome Resumido'].tolist()[-1]).title()
 
-    erros=[l for l in codigos if not l in df['Produtos']['SKU'].unique().tolist()]
+    erros=[l for l in codigos if not l in df['Fotos']['SKU'].unique().tolist()]
 
     erros=','.join([str(l) for l in erros])
 
-    if len(df['Produtos'])>0:
+    if len(df['Fotos'])>0:
 
         #bot.delete_message(chat_id=message.from_user.id,message_id=message.message_id)
-        bot.send_chat_action(chat_id=chat_id,action='typing')
+        bot.send_chat_action(chat_id=chat_id,action='typing',timeout=espera)
 
-        #criar a pasta
-        temp_path=Path(__file__)
+        path_base=Path(__file__).parent.joinpath('Fotos')
+        path_base.mkdir(exist_ok=True)
 
-        temp_path=temp_path.parent.joinpath('Fotos')
-        temp_path.mkdir(exist_ok=True)
+        mensagem=f'Obs: Não encontramos na relação esses códigos com as fotos: <strong>{erros}</strong>'
+        temp=[]
+        for arq in df['Fotos']['Fotos'].unique().tolist():
 
-        #mover as fotos
-        for arq in df['Produtos']['Fotos'].unique().tolist():
+            arq_name=os.path.basename(arq)
+
+            path_destino=os.path.join(path_base,arq_name)
+
+            shutil.copy(arq,path_destino)
+
+            with Image.open(arq) as img:
+
+                width,heigth=img.size
+
+                new_width=2240
+                
+                if width>new_width:
+                    
+                    new_height=Calc_img(width,heigth,new_width)
+
+                    new_img=img.resize((new_width,new_height),Image.LANCZOS)
+                    new_img.save(path_destino)
+                    
+                    pass                
+
+                pass
 
             try:
 
-                arq_name=Path(arq).name
-            
-                path_destino=temp_path.joinpath(arq_name)
+                with open(path_destino,'rb') as file:
 
-                shutil.copy(arq,path_destino)
+                    temp.append(types.InputMediaPhoto(
+
+                        file.read()
+                    ))
 
                 pass
 
             except:
 
-                continue
+                continue            
 
             pass
 
-        if os.path.exists(os.path.join(temp_path))==True:
+        bot.send_media_group(chat_id=chat_id,media=temp)
+        shutil.rmtree(os.path.join(path_base))
 
-            shutil.make_archive(temp_path.name,'zip',os.path.join(temp_path))
+        if len(erros)>0:
 
-            shutil.rmtree(temp_path)
+            bot.send_message(chat_id=chat_id,text=mensagem)
 
-            zip_path=os.path.join(os.getcwd(),f'{temp_path.name}.zip')
-
-            zips=Web(zip_path)
-
-            link=zips.WebLink()
-            
             pass
-
-        mensagem=f'{msg};\n{nome} tudo bem?\n\nSegue o link das fotos: {link}' if len(erros)<=0 else f'{msg};\n{nome} tudo bem?\n\nSegue o link das fotos: {link}.\n\nObs: Não encontramos na relação esses códigos com as fotos: <strong>{erros}</strong>'
-
-        bot.send_chat_action(chat_id=chat_id,action='typing')
-        bot.send_message(chat_id=chat_id,text=mensagem)
 
         pass
 
@@ -906,8 +929,6 @@ def Foto(message):
         bot.send_message(chat_id=chat_id,text=f'{msg} {nome} tudo bem! não identificamos nenhum produto com esse código com foto: <strong>{erros}</strong>')
 
         pass
-
-    Remover.RemoverArquivo('.zip')
 
     pass
 
@@ -990,7 +1011,7 @@ def FichaTecnica(message):
 
         link=zips.WebLink()
         
-        mensagem=f'{msg};\n{nome} tudo bem?\n\nSegue o link das fichas técnicas: {link}' if len(erros)<=0 else f'{msg};\n{nome} tudo bem?\n\nSegue o link das fichas técnicas: {link}.\n\nObs: Não encontramos na relação esses códigos com as fotos: <strong>{erros}</strong>'
+        mensagem=f'{msg};\n{nome} tudo bem?\n\nSegue o link das fichas técnicas: {link}' if len(erros)<=0 else f'{msg};\n{nome} tudo bem?\n\nSegue o link das fichas técnicas: {link}.\n\nObs: Não encontrei na relação esses códigos com as fotos: <strong>{erros}</strong>'
 
         bot.send_chat_action(chat_id=chat_id,action='typing')
         bot.send_message(chat_id=chat_id,text=mensagem)
@@ -1003,7 +1024,7 @@ def FichaTecnica(message):
         #bot.delete_message(chat_id=message.from_user.id,message_id=message.message_id)
         bot.send_chat_action(chat_id=message.from_user.id,action='typing')
 
-        bot.send_message(chat_id=message.from_user.id,text=f'{msg} {nome} tudo bem! não identificamos nenhum produto com esses códigos: <strong>{erros}</strong>')
+        bot.send_message(chat_id=message.from_user.id,text=f'{msg} {nome} tudo bem! não identifiquei nenhum produto com esses códigos: <strong>{erros}</strong>')
 
         pass
 
@@ -1043,7 +1064,7 @@ def DadosProdutos(message):
 
         with open('Dados dos produtos.xlsx','rb') as file:
         
-            mensagem=f'{msg};\n{nome} tudo bem?\n\nSegue o arquivo com os dados dos produtos.' if len(erros)<=0 else f'{msg};\n{nome} tudo bem?\n\nSegue o arquivo com os dados dos produtos.\n\nObs: Não encontramos na relação esses códigos: <strong>{erros}</strong>'
+            mensagem=f'{msg};\n{nome} tudo bem?\n\nSegue o arquivo com os dados dos produtos.' if len(erros)<=0 else f'{msg};\n{nome} tudo bem?\n\nSegue o arquivo com os dados dos produtos.\n\nObs: Não encontrei na relação esses códigos: <strong>{erros}</strong>'
             
             bot.send_chat_action(chat_id=chat_id,action='typing',timeout=espera)  
             bot.send_document(chat_id=chat_id,document=file,caption=mensagem)
@@ -1057,7 +1078,7 @@ def DadosProdutos(message):
     else:
 
         bot.send_chat_action(chat_id=chat_id,action='typing',timeout=espera)  
-        bot.send_message(chat_id=chat_id,text=f'{msg} {nome} tudo bem! não identificamos nenhum produto com esses códigos: <strong>{erros}</strong>')
+        bot.send_message(chat_id=chat_id,text=f'{msg} {nome} tudo bem! não identifiquei nenhum produto com esses códigos: <strong>{erros}</strong>')
 
         pass    
 
@@ -1541,6 +1562,12 @@ def Voice(mensagem):
 def DataConverte(data):
 
     return datetime.strftime(data,'%d/%m/%Y')
+
+    pass
+
+def Calc_img(width,height,new_width):
+
+    return round(new_width*(height/width))
 
     pass
 
