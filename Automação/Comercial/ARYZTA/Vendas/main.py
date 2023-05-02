@@ -111,30 +111,30 @@ def Main(tabelas_df):
 
     tabelas_df['Vendedor']=tabelas_df['Vendedor'].merge(tabelas_df['Supervisor'],on='ID Equipe',how='inner')[['ID Vendedor', 'Vendedor', 'Nome Resumido', 'Equipe','Supervisor']]
 
-    tabelas_df['Vendas']=tabelas_df['Vendas'].merge(tabelas_df['Produto'],on='SKU',how='inner')[['Data de Emissão', 'Data de Faturamento', 'Pedido', 'Nfe', 'ID Empresa',
+    tabelas_df['Vendas']=tabelas_df['Vendas'].merge(tabelas_df['Produto'],on='SKU',how='inner')[['Data de Emissão', 'Data de Faturamento', 'Pedido', 'NFe', 'ID Empresa',
         'ID Cliente', 'ID Vendedor', 'Tipo de Pedido', 'Tipo de Operação',
         'Tabelas', 'SKU','Cód. Fabricante', 'Produto', 'Status', 'Fabricante',
-        'Departamento', 'Seção', 'Categoria', 'Linha', 'Qtde', 'Unid. VDA', 'Qtde VDA', 'Valor VDA',
+        'Departamento', 'Seção', 'Categoria', 'Linha', 'Qtde', 'Unid. VDA', 'Qtde VDA', 'Valor de VDA',
         'Total Geral', 'Total Venda', 'Comissão R$', 'Margem Bruta R$',
-        'Cad Vendedor', 'Situação', 'Peso Bruto KG', 'Peso Líquido KG']]    
+        'Situação', 'Peso Bruto KG', 'Peso Líquido KG']]    
 
 
-    tabelas_df['Vendas']=tabelas_df['Vendas'].merge(tabelas_df['Cliente'],on='ID Cliente',how='inner')[['Data de Emissão', 'Data de Faturamento', 'Pedido', 'Nfe', 'ID Empresa',
+    tabelas_df['Vendas']=tabelas_df['Vendas'].merge(tabelas_df['Cliente'],on='ID Cliente',how='inner')[['Data de Emissão', 'Data de Faturamento', 'Pedido', 'NFe', 'ID Empresa',
         'ID Cliente','CNPJ','Razão Social', 'Nome Fantasia','Matriz','Segmento','Canal','Bairro','Município', 'ID Vendedor', 'Tipo de Pedido', 'Tipo de Operação',
         'Tabelas', 'SKU', 'Cód. Fabricante', 'Produto', 'Status', 'Fabricante',
         'Departamento', 'Seção', 'Categoria', 'Linha', 'Qtde', 'Unid. VDA',
-        'Qtde VDA', 'Valor VDA', 'Total Geral', 'Total Venda', 'Comissão R$',
-        'Margem Bruta R$', 'Cad Vendedor', 'Situação', 'Peso Bruto KG',
+        'Qtde VDA', 'Valor de VDA', 'Total Geral', 'Total Venda', 'Comissão R$',
+        'Margem Bruta R$', 'Situação', 'Peso Bruto KG',
         'Peso Líquido KG']]
 
 
-    tabelas_df['Vendas']=tabelas_df['Vendas'].merge(tabelas_df['Vendedor'],on='ID Vendedor',how='inner')[['Data de Emissão', 'Data de Faturamento', 'Pedido', 'Nfe', 'ID Empresa',
+    tabelas_df['Vendas']=tabelas_df['Vendas'].merge(tabelas_df['Vendedor'],on='ID Vendedor',how='inner')[['Data de Emissão', 'Data de Faturamento', 'Pedido', 'NFe', 'ID Empresa',
         'ID Cliente', 'CNPJ', 'Razão Social', 'Nome Fantasia', 'Matriz',
         'Segmento', 'Canal', 'Bairro', 'Município', 'ID Vendedor','Vendedor', 'Nome Resumido', 'Equipe', 'Supervisor',
         'Tipo de Pedido', 'Tipo de Operação', 'Tabelas', 'SKU',
         'Cód. Fabricante', 'Produto', 'Status', 'Fabricante', 'Departamento',
         'Seção', 'Categoria', 'Linha', 'Qtde', 'Unid. VDA', 'Qtde VDA',
-        'Valor VDA', 'Total Geral', 'Situação', 'Peso Bruto KG','Peso Líquido KG']]
+        'Valor de VDA', 'Total Geral', 'Situação', 'Peso Bruto KG','Peso Líquido KG']]
 
     produto_df=pd.DataFrame()
 
