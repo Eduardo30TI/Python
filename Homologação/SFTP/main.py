@@ -17,6 +17,7 @@ from selenium.webdriver.support.ui import Select
 from selenium.webdriver.support.wait import WebDriverWait
 from bs4 import BeautifulSoup
 import pyautogui as gui
+from selenium.webdriver.common.alert import Alert
 
 
 hostname='20.96.234.129'
@@ -69,7 +70,7 @@ def Web():
 
     opcao=ChromeOptions()
     #opcao.add_argument('--start-fullscreen')
-    #opcao.add_argument('--headless=new')
+    opcao.add_argument('--headless=new')
     opcao.add_experimental_option('prefs',{'download.default_directory':os.getcwd(),'safebrowsing.enabled':'false'})
 
     service=Service(ChromeDriverManager().install())
@@ -152,7 +153,7 @@ def Web():
 
             dt_atual=datetime.strftime(datetime.now().date(),'%d/%m/%Y')
 
-            #dt_atual='27/04/2023'
+            #dt_atual='01/05/2023'
 
             campo=WebDriverWait(driver=driver,timeout=espera).until(lambda d: d.find_element(By.ID,id))
             campo.send_keys(dt_atual)
@@ -195,11 +196,25 @@ def Web():
         #gui.click(img.x,img.y)
         time.sleep(10)
 
+        try:    
+
+            alert = Alert(driver)
+
+            print(alert.text)
+
+            alert.accept()
+
+            pass
+
+        except:
+
+            continue
+
         #break
 
         pass
 
-
+    
     driver.close()
 
     Main()
