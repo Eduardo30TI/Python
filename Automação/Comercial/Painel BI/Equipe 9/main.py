@@ -32,7 +32,7 @@ querys={
 
     SET @DTINICIO=CONCAT(YEAR(@DTFIM),'-',MONTH(@DTFIM),'-01')
 
-    SELECT * FROM netfeira.vw_targetestatico
+    SELECT * FROM netfeira.vw_venda_estatico
     WHERE [Data de Faturamento] BETWEEN @DTINICIO AND @DTFIM
     ORDER BY [Data de Faturamento]
 
@@ -131,7 +131,13 @@ def Main(tabelas_df):
 
         'THAISFRE': 'https://api.powerbi.com/beta/89024f02-ca0e-4816-b5b2-1b5bdf790280/datasets/954cdbf3-9398-433f-baa4-3b243b1eb066/rows?key=taEkQcKY3ublqEW%2BBLWEVDDyAX7M6YjgyyfhA7NaOi8aXtCy73IqEJNrLgw90qQgHZrOaNEfSsJzPXUI1V6nrQ%3D%3D',
 
-        'MAIARARO':'https://api.powerbi.com/beta/89024f02-ca0e-4816-b5b2-1b5bdf790280/datasets/01c94e36-118b-4d7f-bfc1-564e8db0eba9/rows?noSignUpCheck=1&key=0kbFlqFn5Rw5dvTpBouh2jPQH6J3I%2B4cLSbu7yJ1P0RwpwsWIhqmqm2cBotXTOfI1np%2F3FcbQLMsXM83kRVu7A%3D%3D'
+        'MAIARARO':'https://api.powerbi.com/beta/89024f02-ca0e-4816-b5b2-1b5bdf790280/datasets/01c94e36-118b-4d7f-bfc1-564e8db0eba9/rows?noSignUpCheck=1&key=0kbFlqFn5Rw5dvTpBouh2jPQH6J3I%2B4cLSbu7yJ1P0RwpwsWIhqmqm2cBotXTOfI1np%2F3FcbQLMsXM83kRVu7A%3D%3D',
+
+        'CHRISTI':'https://api.powerbi.com/beta/89024f02-ca0e-4816-b5b2-1b5bdf790280/datasets/04bc0e0a-9313-4af9-a29b-afbfd2423233/rows?key=8AFXIhsKPrKD1y6TgINjYRT2uBe%2B9OHQOxtwd3F%2FR2nXfWxAO7tey18fqXu26FU%2B8vFblD2AUgsLYHmCz47ndA%3D%3D',
+
+        'DEBORA':'https://api.powerbi.com/beta/89024f02-ca0e-4816-b5b2-1b5bdf790280/datasets/c45bda08-24e4-468f-880a-ee6c197e5e8d/rows?key=1R7NkuTfu1SKSl0gWcGKM8VnIzYswv5dlL9rRicBRlXIyy%2F6ytPIiNTfkYoAR9X2FbKYpPKUZQjbpSGJ2I4qQA%3D%3D',
+
+        'FABIANA':'https://api.powerbi.com/beta/89024f02-ca0e-4816-b5b2-1b5bdf790280/datasets/5ec9655e-39be-4542-90bc-2e4c52fc6a31/rows?key=m07suCRxfnOQkRY6AQlTVdBdGEhfL934iXE3E2i7migbC6AqeP0NcRwtpgtoULOzBisN8YPeZxqD09LUfHHjhQ%3D%3D'
 
 
     }
@@ -212,7 +218,7 @@ def Main(tabelas_df):
 
             mix_geral=len(produto_df['SKU'].tolist())
 
-            mix_perc=round(mix_positivado/mix_geral,4)*100
+            mix_perc=round(mix_positivado/mix_geral,4)*100 if mix_geral>0 else 0
             
             situacao_df=pd.DataFrame()
             
@@ -244,13 +250,13 @@ def Main(tabelas_df):
 
             total=round(faturado+em_aberto,2)
             
-            perc_meta=round(total/meta,4)*100
+            perc_meta=round(total/meta,4)*100 if meta>0 else 0
             
             carteira=len(tabelas_df['Carteira']['ID Cliente'].loc[(tabelas_df['Carteira']['ID Vendedor']==linha['ID Vendedor'])].unique().tolist())
             
             qtd_cli=cliente if cliente>0 else 0
             
-            perc_carteira=round(qtd_cli/carteira,4)*100
+            perc_carteira=round(qtd_cli/carteira,4)*100 if carteira>0 else 0
             
             dif_cart=carteira-cliente
             
