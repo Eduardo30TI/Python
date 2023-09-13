@@ -99,11 +99,9 @@ def Analise(df):
 
     requests.post(url=links['Consolidado'],json=temp_dict)
 
-    df['SKU']=df['SKU'].astype(str)
-
     df=df[['SKU','Produto','Qtde Disponível']]
 
-    df.sort_values('Qtde Disponível',ascending=False,inplace=True)
+    df=df.sort_values('Qtde Disponível',ascending=False)
 
     requests.post(url=links['Produto'],json=df.to_dict('records'))
 

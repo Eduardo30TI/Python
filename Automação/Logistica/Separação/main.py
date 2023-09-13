@@ -60,7 +60,7 @@ def Main(df):
         
         """
 
-        df['Separação'].to_excel('Relatório de Separação.xlsx',index=False)
+        df['Separação'].to_excel('Relatório de Separação.xlsx',index=False,encoding='UTF-8')
 
         temp_path=os.path.join(os.getcwd(),'*.xlsx')
 

@@ -163,7 +163,7 @@ def Main():
 
         else:
         
-            df['Consolidado'][colunas].to_csv(path_memoria,index=False,encoding='UTF-8')
+            df['Consolidado'][colunas].to_csv(path_memoria,index=False)
 
             pass
 

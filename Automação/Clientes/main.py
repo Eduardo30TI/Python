@@ -154,7 +154,7 @@ def Analise(carteira_df):
             
             nome=temp_df[col].unique().tolist()
 
-            temp_df[['ID Cliente','CNPJ','Razão Social','Nome Fantasia','ID Vendedor','Nome','Situação Cadastral','DDD','Contato']].to_excel(f'Clientes {str(nome[-1]).title()}.xlsx',index=False)
+            temp_df[['ID Cliente','CNPJ','Razão Social','Nome Fantasia','ID Vendedor','Nome','Situação Cadastral','DDD','Contato']].to_excel(f'Clientes {str(nome[-1]).title()}.xlsx',index=False,encoding='utf-8')
 
             data_atual=data.HoraAtual()
 

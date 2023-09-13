@@ -17,7 +17,7 @@ querys={
     
     'Estatico':"""
     
-    SELECT * FROM netfeira.vw_estatico
+    SELECT * FROM netfeira.vw_venda_estatico
     WHERE YEAR([Data de Faturamento])=YEAR(GETDATE())
     
     """,
@@ -35,8 +35,8 @@ querys={
     (ROUND(SUM([Total Geral]),2)-SUM([Custo CUE])) AS 'MG Bruta',ROUND(
     ((ROUND(SUM([Total Geral]),2)-SUM([Custo CUE])))/NULLIF(ROUND(SUM([Total Geral]),2),0),4) AS 'MG %'
     FROM netfeira.vw_estatistico
-    WHERE YEAR([Data do Faturamento])=YEAR(GETDATE()) AND MONTH([Data do Faturamento])=MONTH(GETDATE())
-    AND [Situação]='FA'   
+    WHERE YEAR([Data de Faturamento])=YEAR(GETDATE()) AND MONTH([Data de Faturamento])=MONTH(GETDATE())
+    AND [ID Situação]='FA'
     
     """
     

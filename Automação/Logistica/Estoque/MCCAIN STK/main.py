@@ -53,7 +53,7 @@ def Estoque(tabelas_df):
 
         temp_df=estoque_df.loc[(estoque_df['Grupo MCCAIN']==g)&(estoque_df['Qtde CMP']>0)]
 
-        temp_df.to_excel(f'Estoque {g}.xlsx',index=False)
+        temp_df.to_excel(f'Estoque {g}.xlsx',index=False,encoding='UTF-8')
 
         mensagem=f"""
                 

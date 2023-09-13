@@ -37,9 +37,9 @@ class Email:
             mailItem.Attachments.Add(arq)
 
             pass
-
-        #mailItem.Display()
-        mailItem.Send()
+        
+        mailItem.Display()
+        #mailItem.Send()
 
         pass
 

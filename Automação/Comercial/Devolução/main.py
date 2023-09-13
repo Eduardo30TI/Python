@@ -105,9 +105,9 @@ def Equipes(df):
 
             motivos_df['Cliente']=motivos_df.apply(lambda info: len(temp_df['ID Cliente'].loc[temp_df['Motivo']==info['Motivo']].unique().tolist()),axis=1)
 
-            temp_df.to_excel('Lista de Pedidos.xlsx',index=False)
+            temp_df.to_excel('Lista de Pedidos.xlsx',index=False,encoding='UTF-8')
 
-            motivos_df.to_excel('Motivos.xlsx',index=False)
+            motivos_df.to_excel('Motivos.xlsx',index=False,encoding='UTF-8')
 
             if(hora<=11):
 

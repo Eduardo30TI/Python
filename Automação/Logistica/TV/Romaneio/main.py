@@ -16,13 +16,8 @@ querys={
     """
     
     SELECT * FROM netfeira.vw_roteiros
-    WHERE [Data da Montagem] BETWEEN (SELECT MIN(Data) 
-    FROM netfeira.vw_calend
-    WHERE YEAR(Data)=YEAR(GETDATE()) AND MONTH(Data)=MONTH(GETDATE())) AND
-    (SELECT MAX(Data) 
-    FROM netfeira.vw_calend
-    WHERE YEAR(Data)=YEAR(GETDATE()) AND MONTH(Data)=MONTH(GETDATE()))
-    ORDER BY [Data da Montagem] 
+    WHERE YEAR([Data da Montagem])=YEAR(GETDATE()) AND MONTH([Data da Montagem])=MONTH(GETDATE())
+    ORDER BY [Data da Montagem]
     
     """,
     
@@ -93,7 +88,9 @@ def Main(df):
 
     perc=df['Log']['Perc'].values[-1]
 
-    frete=df['Rota']['Frete R$'].sum()
+    df['Temp']=df['Rota'].groupby(['Romaneio','Frete Pago'],as_index=False).agg({'Pedido':'count'})
+
+    frete=df['Temp']['Frete Pago'].sum()
 
     util=df['Calendario'].loc[df['Calendario']['Dia Útil']==1,'Data'].count()
 
@@ -109,7 +106,9 @@ def Main(df):
 
     df['Semana']['Data Máx']=df['Semana']['Semana Ano'].apply(lambda info: df['Calendario']['Data'].loc[df['Calendario']['Semana Ano']==info].max())
 
-    df['Semana']['Frete R$']=df['Semana'].apply(lambda info: df['Rota']['Frete R$'].loc[df['Rota']['Data da Montagem'].between(info['Data Mín'],info['Data Máx'])].sum(),axis=1)
+    df['Temp']=df['Rota'].groupby(['Romaneio','Frete Pago','Data da Montagem'],as_index=False).agg({'Pedido':'count'})
+
+    df['Semana']['Frete R$']=df['Semana'].apply(lambda info: df['Temp']['Frete Pago'].loc[df['Temp']['Data da Montagem'].between(info['Data Mín'],info['Data Máx'])].sum(),axis=1)
 
     df['Semana']['Dif']=round(df['Semana']['Meta Semanal']-df['Semana']['Frete R$'],2)
 
@@ -157,7 +156,9 @@ def Main(df):
 
     saldo=meta_frete-frete
 
-    df['Regiao']=df['Rota'].groupby(['Rota'],as_index=False).agg({'Frete R$':'sum'})
+    df['Temp']=df['Rota'].groupby(['Romaneio','Rota','Frete Pago'],as_index=False).agg({'Pedido':'count'})
+
+    df['Regiao']=df['Temp'].groupby(['Rota'],as_index=False).agg({'Frete Pago':'sum'})
 
     df['Regiao']['Pedidos']=df['Regiao']['Rota'].apply(lambda info: len(df['Rota']['Pedido'].loc[df['Rota']['Rota']==info].unique().tolist()))
 
@@ -182,6 +183,8 @@ def Main(df):
     requests.post(url=links['Geral'],json=temp_dict)
 
     requests.post(url=links['Rota'],json=df['Regiao'].to_dict('records'))
+
+
 
     pass
 

@@ -22,7 +22,7 @@ def Consolidado(tabelas_df):
 
     valor_vencer=tabelas_df['Pagar']['Título R$'].loc[(tabelas_df['Pagar']['Data de Vencimento'].dt.year==data_atual.year)&(tabelas_df['Pagar']['Data de Vencimento'].dt.month==data_atual.month)&(tabelas_df['Pagar']['ID Situação'].isin(['AB','PL']))&(tabelas_df['Pagar']['Contas'].isin(['FORNECEDORES']))].sum()
 
-    faturado=round(tabelas_df['Estatico']['Total Geral'].loc[(tabelas_df['Estatico']['Tipo de Operação']=='VENDAS')&(tabelas_df['Estatico']['Status do Pedido']!='EM ABERTO')&(tabelas_df['Estatico']['Data de Faturamento'].dt.year==data_atual.year)&(tabelas_df['Estatico']['Data de Faturamento'].dt.month==data_atual.month)].sum(),2)
+    faturado=round(tabelas_df['Estatico']['Total Geral'].loc[(tabelas_df['Estatico']['Tipo de Operação']=='VENDAS')&(tabelas_df['Estatico']['Situação']!='EM ABERTO')&(tabelas_df['Estatico']['Data de Faturamento'].dt.year==data_atual.year)&(tabelas_df['Estatico']['Data de Faturamento'].dt.month==data_atual.month)].sum(),2)
 
     aberto=round(tabelas_df['Aberto']['Total Geral'].loc[(tabelas_df['Aberto']['Data do Pedido'].dt.year==data_atual.year)&(tabelas_df['Aberto']['Data do Pedido'].dt.month==data_atual.month)&(tabelas_df['Aberto']['Data do Pedido'].dt.day==data_atual.day)&(tabelas_df['Aberto']['Situação']=='AB')].sum())
 
@@ -114,7 +114,7 @@ def Mensal(tabelas_df):
     mensal_df['Vendas R$']=mensal_df['ID Mês'].apply(
 
         lambda mes:
-        round(tabelas_df['Estatico']['Total Geral'].loc[(tabelas_df['Estatico']['Tipo de Operação']=='VENDAS')&(tabelas_df['Estatico']['Status do Pedido']!='EM ABERTO')&(tabelas_df['Estatico']['Data de Faturamento'].dt.year==data_atual.year)&((tabelas_df['Estatico']['Data de Faturamento'].dt.month==mes))].sum(),2)
+        round(tabelas_df['Estatico']['Total Geral'].loc[(tabelas_df['Estatico']['Tipo de Operação']=='VENDAS')&(tabelas_df['Estatico']['Situação']!='EM ABERTO')&(tabelas_df['Estatico']['Data de Faturamento'].dt.year==data_atual.year)&((tabelas_df['Estatico']['Data de Faturamento'].dt.month==mes))].sum(),2)
     
     )
 

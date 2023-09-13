@@ -51,8 +51,8 @@ querys={
 
 
     SELECT * FROM netfeira.vw_venda_estatico
-    WHERE [Tipo de Operação]<>'OUTROS' AND [Data de Faturamento] BETWEEN @DTINICIO AND @DTFIM AND Situação<>'EM ABERTO'
-    ORDER BY [Data de Faturamento]    
+    WHERE [Tipo de Operação]<>'OUTROS' AND [Data de Faturamento] BETWEEN @DTINICIO AND @DTFIM
+    ORDER BY [Data de Faturamento]
     
     """,
 
@@ -115,8 +115,7 @@ def Main(tabelas_df):
         'ID Cliente', 'ID Vendedor', 'Tipo de Pedido', 'Tipo de Operação',
         'Tabelas', 'SKU','Cód. Fabricante', 'Produto', 'Status', 'Fabricante',
         'Departamento', 'Seção', 'Categoria', 'Linha', 'Qtde', 'Unid. VDA', 'Qtde VDA', 'Valor de VDA',
-        'Total Geral', 'Total Venda', 'Comissão R$', 'Margem Bruta R$',
-        'Situação', 'Peso Bruto KG', 'Peso Líquido KG']]    
+        'Total Geral', 'Total Venda', 'Comissão R$', 'Margem Bruta R$','Situação', 'Peso Bruto KG', 'Peso Líquido KG']]    
 
 
     tabelas_df['Vendas']=tabelas_df['Vendas'].merge(tabelas_df['Cliente'],on='ID Cliente',how='inner')[['Data de Emissão', 'Data de Faturamento', 'Pedido', 'NFe', 'ID Empresa',
@@ -135,7 +134,7 @@ def Main(tabelas_df):
         'Cód. Fabricante', 'Produto', 'Status', 'Fabricante', 'Departamento',
         'Seção', 'Categoria', 'Linha', 'Qtde', 'Unid. VDA', 'Qtde VDA',
         'Valor de VDA', 'Total Geral', 'Situação', 'Peso Bruto KG','Peso Líquido KG']]
-
+    
     produto_df=pd.DataFrame()
 
     produto_df=tabelas_df['Vendas'][['SKU', 'Cód. Fabricante', 'Produto','Fabricante','Linha','Qtde','Total Geral','Peso Bruto KG', 'Peso Líquido KG']].groupby(['SKU', 'Cód. Fabricante', 'Produto','Fabricante','Linha'],as_index=False).sum()
@@ -150,11 +149,17 @@ def Main(tabelas_df):
 
     if(len(tabelas_df['Vendas'])>0):
 
-        produto_df.to_excel('Produtos.xlsx',index=False)
+        excel=pd.ExcelWriter('Consolidado.xlsx',engine='xlsxwriter')
 
-        linha_df.to_excel('Linha.xlsx',index=False)
+        temp_dict={'Produto':produto_df,'Linha':linha_df,'Vendas': tabelas_df['Vendas']}
+        
+        for c,tab in temp_dict.items():
 
-        tabelas_df['Vendas'].to_excel('Histórico de Venda.xlsx',index=False)
+            tab.to_excel(excel,sheet_name=c,index=False)
+
+            pass
+
+        excel.close()
 
         dt_min=tabelas_df['Vendas']['Data de Faturamento'].min()
 

@@ -21,7 +21,7 @@ querys={
 	sup.[ID Sup],sup.Supervisor,sup.[DDD Sup],sup.[Telefone Sup],sup.[ID Gerente],sup.Gerente,sup.[DDD Gerente],
 	sup.[Telefone Gerente],
 	prod.SKU,prod.Produto,prod.Fabricante,[Unid. VDA],[Qtde. VDA],[Valor VDA],[Total Venda]
-	FROM netfeira.vw_estatistico vda
+	FROM netfeira.vw_targetestatistico vda
 	INNER JOIN netfeira.vw_cliente cli ON vda.[ID Cliente]=cli.[ID Cliente]
 	INNER JOIN netfeira.vw_vendedor vend ON vda.[ID Vendedor]=vend.[ID Vendedor]
 	INNER JOIN netfeira.vw_supervisor sup ON vend.[ID Equipe]=sup.[ID Equipe]
@@ -125,7 +125,7 @@ def Main(df):
 
             for tabela in tabelas:
 
-                df[tabela].to_excel(writer,sheet_name=tabela,index=False,encoding='UTF-8')
+                df[tabela].to_excel(writer,sheet_name=tabela,index=False)
 
                 pass
 
@@ -139,7 +139,7 @@ def Main(df):
 
         pass
 
-    whatsapp_df.to_excel(f'whatsapp.xlsx',index=False,encoding='UTF-8')
+    whatsapp_df.to_excel(f'whatsapp.xlsx',index=False)
 
     pass
 

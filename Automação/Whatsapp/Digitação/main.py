@@ -62,7 +62,7 @@ def Main(df):
 
             if not os.path.exists(temp_path):
 
-                df['Pedidos'].to_csv(temp_path,index=False,encoding='UTF-8')
+                df['Pedidos'].to_csv(temp_path,index=False)
 
                 temp_df=pd.DataFrame()
 
@@ -70,7 +70,7 @@ def Main(df):
 
             else:
 
-                temp_df=pd.read_csv(temp_path,encoding='UTF-8')
+                temp_df=pd.read_csv(temp_path)
 
                 lista=temp_df['Pedido'].unique().tolist()
 
@@ -104,11 +104,11 @@ def Main(df):
 
                 temp_path=os.path.join(os.getcwd(),'Divergência.xlsx')
 
-                df['Pedidos'].to_excel(temp_path,index=False,encoding='UTF-8')
+                df['Pedidos'].to_excel(temp_path,index=False)
                 
                 whatsapp_df.loc[len(whatsapp_df)]=[nome,ddd,telefone,mensagem,temp_path]            
 
-                whatsapp_df.to_excel('whatsapp.xlsx',index=False,encoding='UTF-8')
+                whatsapp_df.to_excel('whatsapp.xlsx',index=False)
 
                 temp_path=os.path.join(os.getcwd(),'Consolidado.csv')
 

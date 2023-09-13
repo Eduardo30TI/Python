@@ -76,17 +76,7 @@ def Main():
 
             zips=glob(temp_path)
 
-            if len(zips)>0:
-
-                for zip in zips:
-
-                    w=Web(zip)
-
-                    link_href=w.WebLink()
-
-                    pass
-
-                pass
+            anexo.append(zip[-1])
 
             mensagem=f"""
             
@@ -106,15 +96,13 @@ def Main():
 
             <p>Segue a sua solicitação conforme solicitado. E abaixo segue o link das fotos: </p>
 
-            <p>Link com as fotos: <a href="{link_href}">{link_href}</a></p>
-
             <P>Por favor não responder mensagem automática</P>
 
             <p>Atenciosamente</p>
 
             <p>BOT TI</p>
             
-            """ 
+            """
 
             temp_dict={'To':email_to,'CC':email_cc,'Anexo':anexo}
 

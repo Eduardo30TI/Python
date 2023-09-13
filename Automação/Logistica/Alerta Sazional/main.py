@@ -31,7 +31,7 @@ querys={
 
     SET @DTINICIO=DATEADD(DAY,-30,@DTFIM)
 
-    SELECT * FROM netfeira.vw_targetestatistico
+    SELECT * FROM netfeira.vw_estatistico
     WHERE [Data de Emissão] BETWEEN @DTINICIO AND @DTFIM AND [Tipo de Operação]<>'OUTROS' AND [ID Situação] IN('FA','AB')
     
     """,
@@ -135,7 +135,7 @@ def Analise(df):
 
     if(len(df)>0):
         
-        df.to_excel('Produtos.xlsx',index=False)
+        df.to_excel('Produtos.xlsx',encoding='ISO-8859-1',index=False)
 
         temp_path=os.path.join(os.getcwd(),'*.xlsx')
 

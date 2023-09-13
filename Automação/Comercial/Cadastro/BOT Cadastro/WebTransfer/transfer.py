@@ -19,16 +19,19 @@ class Web:
 
     def WebLink(self):
 
-        service=Service(ChromeDriverManager().install())
+        #service=Service(ChromeDriverManager().install())
+        service=Service()
         option=Options()
         option.add_argument('--headless')
+        
 
-        driver=webdriver.Chrome(service=service,options=option)
+        driver=webdriver.Chrome(service=service)
         driver.get(self.link_base)
 
+        #aceitar os termos de uso
         while True:
 
-            contagem=len(driver.find_elements(By.XPATH,'/html/body/div[2]/div/div[2]/div[2]/div[2]/div[1]/div[3]/div[4]/button[1]'))
+            contagem=len(driver.find_elements(By.XPATH,'//*[@id="__next"]/div/div[2]/div[2]/div[2]/div[1]/div[3]/div[4]/button[1]'))
 
             if contagem>0:
 
@@ -36,7 +39,7 @@ class Web:
 
             pass
 
-        botao=driver.find_element(By.XPATH,'/html/body/div[2]/div/div[2]/div[2]/div[2]/div[1]/div[3]/div[4]/button[1]')
+        botao=driver.find_element(By.XPATH,'//*[@id="__next"]/div/div[2]/div[2]/div[2]/div[1]/div[3]/div[4]/button[1]')
         botao.click()
         time.sleep(2)
 
@@ -57,26 +60,26 @@ class Web:
         anexo.send_keys(self.arquivo)
         
         #/html/body/div[2]/div/div[2]/div/div[2]/button[1]
-        botao=driver.find_element(By.XPATH,'/html/body/div[2]/div/div[2]/div/div[2]/button[1]')
+        botao=driver.find_element(By.XPATH,'//*[@id="__next"]/div/div[3]/div[1]/div[2]/button[1]/svg')
         botao.click()
         time.sleep(2)
 
         #/html/body/div[2]/div/div[2]/div/div[1]/div[1]/div[3]/div[1]/div/div[2]
-        botao=driver.find_element(By.XPATH,'/html/body/div[2]/div/div[2]/div/div[1]/div[1]/div[3]/div[1]/div/div[2]')
+        botao=driver.find_element(By.XPATH,'//*[@id="__next"]/div/div[3]/div[1]/div[1]/div[1]/div[3]/div[1]/div/div[2]/label')
         botao.click()
         time.sleep(2)
 
         #transfer__button transfer-link__url
         while True:
 
-            contagem=len(driver.find_elements(By.XPATH,'/html/body/div[2]/div/div[2]/div/div[2]/button[2]'))
+            contagem=len(driver.find_elements(By.XPATH,'//*[@id="__next"]/div/div[3]/div[1]/div[2]/button[2]'))
 
             if contagem>0:
 
                 break
 
             pass
-        botao=driver.find_element(By.XPATH,'/html/body/div[2]/div/div[2]/div/div[2]/button[2]')
+        botao=driver.find_element(By.XPATH,'//*[@id="__next"]/div/div[3]/div[1]/div[2]/button[2]')
         botao.click()
         time.sleep(2)
 

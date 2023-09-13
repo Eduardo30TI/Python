@@ -33,7 +33,6 @@ querys={
 
 warnings.filterwarnings('ignore')
 
-
 def Main():
 
     gui.Cls()
@@ -65,6 +64,8 @@ def Main():
     PdfBIMBO(lista,paths_dict)
 
     PdfMCCAIN(lista,paths_dict)
+
+    PdfVPJ(lista,paths_dict)
 
     pass
 
@@ -341,6 +342,106 @@ def PdfMCCAIN(listas: list,path_dict: dict):
 
 
         pass
+
+    for key,value in dados_dict.items():
+
+        gui.Cls()
+
+        print('Estamos copiando os arquivos aguarde...')
+
+        try:
+
+            col_leach='EAN'
+        
+            fabricante=df['Produto'].loc[df['Produto'][col_leach]==key,'Fabricante'].tolist()[-1]
+
+            secao=df['Produto'].loc[df['Produto'][col_leach]==key,'Seção'].tolist()[-1]
+
+            linha=df['Produto'].loc[df['Produto'][col_leach]==key,'Linha'].tolist()[-1]
+
+            sku=df['Produto'].loc[df['Produto'][col_leach]==key,'SKU'].tolist()[-1]
+
+            temp_path=os.path.join(path_dict['Destino'],path_foto,fabricante,secao,linha,f'{sku}.pdf')
+
+            path_dir=gui.PathDir(temp_path)
+
+            if not os.path.exists(path_dir):
+
+                os.makedirs(path_dir)
+
+                pass
+
+            shutil.copy(value,temp_path)
+
+            pass
+
+        except:
+
+            continue
+
+        pass
+
+    print('Arquivo copiado com sucesso!')
+
+    pass
+
+def PdfVPJ(listas: list,path_dict: dict):
+
+    df=sql.CriarTabela(kwargs=querys)
+
+    codigos=[]
+
+    dados_dict=dict()
+
+    for i,lista in enumerate(listas):
+
+        try:
+
+            gui.Cls()
+
+            arq=gui.BaseName(lista)
+
+            print(f'Lendo arquivo {i+1} de {len(listas)}. Aguarde...')
+
+            lista_pdf=PdfReader(lista)
+            page=lista_pdf.pages[0]
+
+            text=page.extract_text()
+
+            for t in text.split('\n'):
+
+                ean=[l for l in t.split() if str(l).isnumeric()]
+
+                if len(ean)<=0:
+
+                    continue
+
+                ean=[l for l in ean if len(l)==13]
+                
+                if len(ean)>0:
+
+                    break
+                
+                pass
+
+            val=ean[-1]
+
+            if val in codigos:
+
+                continue
+
+            dados_dict[val]=lista
+
+            codigos.append(val)
+
+            pass
+
+        except:
+
+            continue
+
+        pass
+
 
     for key,value in dados_dict.items():
 

@@ -122,7 +122,7 @@ def Main(df):
 
             for key,value in sheets.items():
 
-                df[key].loc[df[key][col1]==c].to_excel(writer,sheet_name=value,index=False,encoding='UTF-8')
+                df[key].loc[df[key][col1]==c].to_excel(writer,sheet_name=value,index=False)
 
                 pass
 
@@ -137,7 +137,7 @@ def Main(df):
         
         pass
 
-    whatsapp_df.to_excel('whatsapp.xlsx',index=False,encoding='UTF-8')
+    whatsapp_df.to_excel('whatsapp.xlsx',index=False)
 
     pass
 

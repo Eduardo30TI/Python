@@ -210,7 +210,7 @@ def Main(df):
 
                     if col1=='ID Sup':
 
-                        temp_df[['ID Vendedor','Nome Resumido','Equipe','Meta R$','Realizado R$','Dif','Projeção']].to_excel(f'{nome}.xlsx',index=False,encoding='UTF-8')
+                        temp_df[['ID Vendedor','Nome Resumido','Equipe','Meta R$','Realizado R$','Dif','Projeção']].to_excel(f'{nome}.xlsx',index=False)
 
                         path=os.path.join(os.getcwd(),f'{nome}.xlsx')
 
@@ -222,7 +222,7 @@ def Main(df):
 
                 else:
 
-                    temp_df[['ID Vendedor','Nome Resumido','Equipe','Meta R$','Realizado R$','Dif','Projeção']].to_excel(f'{nome}.xlsx',index=False,encoding='UTF-8')
+                    temp_df[['ID Vendedor','Nome Resumido','Equipe','Meta R$','Realizado R$','Dif','Projeção']].to_excel(f'{nome}.xlsx',index=False)
 
                     path=os.path.join(os.getcwd(),f'{nome}.xlsx')
 
@@ -234,7 +234,7 @@ def Main(df):
 
             pass
 
-        whatsapp_df.to_excel('whatsapp.xlsx',index=False,encoding='UTF-8')
+        whatsapp_df.to_excel('whatsapp.xlsx',index=False)
 
         pass
 

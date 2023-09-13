@@ -124,7 +124,7 @@ def Main(tabelas_df):
 
             temp_df.sort_values('Data e Hora',ascending=True,inplace=True)
 
-            temp_df.to_excel(f'{nome}.xlsx',index=False,encoding='UTF-8')
+            temp_df.to_excel(f'{nome}.xlsx',index=False)
 
             temp_path=os.path.join(os.getcwd(),f'{nome}.xlsx')
 
@@ -134,7 +134,7 @@ def Main(tabelas_df):
 
         pass
 
-    whatsapp_df.to_excel('whatsapp.xlsx',index=False,encoding='UTF-8')
+    whatsapp_df.to_excel('whatsapp.xlsx',index=False)
     
     pass
 

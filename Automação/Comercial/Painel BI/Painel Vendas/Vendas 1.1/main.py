@@ -21,10 +21,9 @@ querys={
 
     SET @DTINICIO=CONCAT(YEAR(@DTFIM),'-',MONTH(@DTFIM),'-01')
 
-    SELECT * FROM netfeira.vw_targetestatico
+    SELECT * FROM netfeira.vw_venda_estatico
     WHERE [Data de Faturamento] BETWEEN @DTINICIO AND @DTFIM
     ORDER BY [Data de Faturamento]
-
     
     """,
     
@@ -150,6 +149,8 @@ def Main(tabelas_df):
     mix=len(aberto_df['SKU'].unique().tolist())
 
     dif_diario=round(realizado-meta_diaria,2)
+
+    print(faturado)
 
     temp_dict={
 
@@ -289,23 +290,13 @@ def Equipes(tabelas_df):
 
             aberto_df=tabelas_df['Aberto']
 
-            aberto_df=aberto_df.merge(tabelas_df['Vendedor'],on='ID Vendedor',how='inner')[['ID Empresa', 'Pedido', 'ID Cliente', 'ID Vendedor', 'Data do Pedido',
-                'SKU', 'Qtde', 'Unid. VDA', 'Qtde VDA', 'Valor VDA', 'Total Venda',
-                'Total AV', 'Total Geral', 'Margem Bruta R$', 'Margem Bruta CRP',
-                'Situação', 'Peso Bruto KG', 'Peso Líquido KG','ID Equipe']]
+            aberto_df=aberto_df.merge(tabelas_df['Vendedor'],on='ID Vendedor',how='inner')
 
             aberto_df=aberto_df.loc[aberto_df['ID Equipe']==cod]   
 
             vendas_df=tabelas_df['TargetEstatico'].loc[tabelas_df['TargetEstatico']['Tipo de Operação']=='VENDAS']
 
-            vendas_df=vendas_df.merge(tabelas_df['Vendedor'],on='ID Vendedor',how='inner')[['ID Empresa', 'Pedido', 'Nfe', 'ID Cliente', 'ID Vendedor',
-                'Data de Emissão', 'Data de Faturamento', 'ID Motivo', 'Situação',
-                'Tipo de Pedido', 'Tipo de Operação', 'ID Roteiro', 'ID Usuário',
-                'Tabelas', 'Origem', 'Tipo de Entrega', 'Seq Roteiro', 'SKU', 'Seq',
-                'Qtde', 'Unid. VDA', 'Qtde VDA', 'Valor VDA', 'Total Venda', 'Total AV',
-                'Total Geral', 'Margem Bruta R$', 'Comissão R$', 'IPI R$', 'PIS R$',
-                'COFINS R$', 'ICMS R$', 'ICMS ST R$', 'Peso Bruto KG',
-                'Peso Líquido KG', 'Cad Vendedor','ID Equipe']]
+            vendas_df=vendas_df.merge(tabelas_df['Vendedor'],on='ID Vendedor',how='inner')
 
             vendas_df=vendas_df.loc[vendas_df['ID Equipe']==cod]
 
@@ -476,7 +467,7 @@ def Equipes(tabelas_df):
             pass
                         
         except:
-
+            
             continue
 
         pass

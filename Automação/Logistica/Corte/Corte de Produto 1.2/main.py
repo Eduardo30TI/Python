@@ -245,7 +245,7 @@ def Analisar(corte_df):
 
                 email_cc=['julio@demarchibrasil.com.br','edson.junior@demarchibrasil.com.br']
 
-                temp_df.to_excel('Corte Geral.xlsx',index=False)
+                temp_df.to_excel('Corte Geral.xlsx',index=False,encoding='ISO-8859-1')
 
                 pass
 
@@ -253,11 +253,11 @@ def Analisar(corte_df):
 
                 arq=f'{str(nome).title()}.xlsx'
 
-                temp_df.to_excel(arq,index=False)
+                temp_df.to_excel(arq,index=False,encoding='ISO-8859-1')
 
                 pass
             
-            produto_df.to_excel('Produto.xlsx',index=False)
+            produto_df.to_excel('Produto.xlsx',index=False,encoding='ISO-8859-1')
 
             temp_path=os.path.join(os.getcwd(),'*.xlsx')
 

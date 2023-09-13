@@ -47,9 +47,9 @@ def Analise():
 
     if(len(dados)==0):
 
-        estoque_df.loc[estoque_df['Acompanhamento']!='OK'].to_csv('Produtos B2C.csv',index=False,encoding='ISO-8859-1')
+        estoque_df.loc[estoque_df['Acompanhamento']!='OK'].to_csv('Produtos B2C.csv',index=False)
 
-        estoque_df.loc[estoque_df['Acompanhamento']!='OK'].to_excel('Produtos B2C.xlsx',index=False,encoding='ISO-8859-1')
+        estoque_df.loc[estoque_df['Acompanhamento']!='OK'].to_excel('Produtos B2C.xlsx',index=False)
 
         temp_path=os.path.join(os.getcwd(),'*.xlsx')
         
@@ -88,7 +88,7 @@ def Analise():
 
             estoque_df.drop(columns=['Revisão'],inplace=True)
 
-            estoque_df.to_excel('Produtos B2C.xlsx',index=False,encoding='ISO-8859-1')
+            estoque_df.to_excel('Produtos B2C.xlsx',index=False)
 
             temp_path=os.path.join(os.getcwd(),'*.xlsx')
             

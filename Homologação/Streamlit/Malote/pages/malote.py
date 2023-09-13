@@ -70,10 +70,8 @@ def Main():
 
         df['Roteiro']=df['Roteiro'].loc[~df['Roteiro']['Roteiro'].isin(lista)]
 
-        btn1.success('Dados atualizado com sucesso!')
-
         pass
-
+    
     btn1,btn2=st.sidebar.columns(2)
     btn_refresh=btn1.button('Atualizar')
 

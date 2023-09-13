@@ -55,14 +55,14 @@ def Base(tabela_df):
     tabela_df['TargetEstatico']=tabela_df['TargetEstatico'].merge(tabela_df['Produto'],on='SKU',how='inner')[['Data de Emissão', 'Data de Faturamento', 'Pedido', 'NFe', 'ID Empresa',
         'ID Cliente', 'ID Vendedor', 'Tipo de Pedido', 'Tipo de Operação',
         'Tabelas', 'SKU','Cód. Fabricante', 'Produto', 'Status', 'Fabricante','Qtde', 'Unid. VDA', 'Qtde VDA', 'Valor de VDA',
-        'Total Geral', 'Total Venda', 'Comissão R$', 'Margem Bruta R$',
-        'Situação', 'Peso Bruto KG', 'Peso Líquido KG','Unid. CMP','Fator CMP']]
+        'Total Geral', 'Total Venda', 'Comissão R$', 'Margem Bruta R$', 'Situação', 'Peso Bruto KG', 'Peso Líquido KG','Unid. CMP','Fator CMP']]
 
     vendas_df=pd.DataFrame()
 
     vendas_df=tabela_df['TargetEstatico']
 
     vendas_df=vendas_df[['Data de Faturamento','SKU','Produto','Unid. CMP','Fator CMP','Qtde']].loc[vendas_df['Fabricante'].str.contains('BIMBO')].groupby(['Data de Faturamento','SKU','Produto','Unid. CMP','Fator CMP'],as_index=False).sum()
+
     valores=[]
 
     for indice,linha in vendas_df.iterrows():
@@ -75,7 +75,7 @@ def Base(tabela_df):
         
         else:
             
-            res=int(linha['Qtde']/linha['Fator CMP']) if linha['Fator CMP']>0 else 0
+            res=int(linha['Qtde']/linha['Fator CMP'])
             
             pass
         
@@ -87,12 +87,11 @@ def Base(tabela_df):
 
     vendas_df=vendas_df[['SKU','Produto','Convertido']].groupby(['SKU','Produto'],as_index=False).mean()
 
-    vendas_df['Convertido']=vendas_df.apply(lambda info: int(info['Convertido']),axis=1)
+    vendas_df['Convertido']=vendas_df['Convertido'].astype(int)
 
     vendas_df=vendas_df[['SKU','Convertido']].loc[vendas_df['Convertido']>0]
 
     return vendas_df
-   
 
     pass
 

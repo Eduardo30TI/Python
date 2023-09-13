@@ -269,7 +269,7 @@ def Main(df):
 
                 temp_df=df[s].loc[df[s][col1]==c]
 
-                temp_df.to_excel(writer,sheet_name=sheets[s],index=False,encoding='UTF-8')
+                temp_df.to_excel(writer,sheet_name=sheets[s],index=False)
                 
                 pass
 
@@ -285,7 +285,7 @@ def Main(df):
 
     if(len(df['Temp'])>0):
 
-        whatsapp_df.to_excel('whatsapp.xlsx',index=False,encoding='UTF-8')
+        whatsapp_df.to_excel('whatsapp.xlsx',index=False)
 
         pass
 

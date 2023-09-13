@@ -28,4 +28,18 @@ class Query(SQL):
 
         pass
 
+    def GetDados(self,querys: dict,tabela: list):
+
+        temp_dict=dict()
+
+        for tab in tabela:
+
+            temp_dict[tab]=pd.read_sql(querys[tab],self.conectando)
+
+            pass
+
+        return temp_dict
+
+        pass
+
     pass

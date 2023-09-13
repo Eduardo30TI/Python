@@ -10,6 +10,8 @@ import PyPDF2
 from docx import Document
 from datetime import datetime
 import shutil
+import time
+from streamlit_js_eval import streamlit_js_eval
 
 mail=Mail()
 
@@ -32,6 +34,7 @@ def Main():
     tab1,tab2,tab3,tab4,tab5,tab6=st.tabs(['Dados Pessoais','Endereço','Documentos','Dependentes','Anexo','Banco'])
 
     #tab1 - dados pessoais
+    val_dict['func_empresa']=tab1.selectbox('Empresa',options=['NETFEIRA PONTOCOM LTDA'],key='empresa')
     val_dict['nome']=tab1.text_input('Nome do funcionário',placeholder='Digite seu nome completo',key='nome')
     col1,col2=tab1.columns(2)
     val_dict['grau']=col1.selectbox('Grau de Instrução',options=['1º grau incompleto','1º grau completo','2º grau incompleto','2º grau completo','Superior incompleto','Superior completo','Analfabeto'],key='grau')
@@ -69,18 +72,18 @@ def Main():
     val_dict['cpf']=cpf
     col3,col4=tab3.columns(2)
     val_dict['pis']=col3.text_input('PIS',key='pis')
-    dt_pis=col4.date_input('Data')
-    val_dict['dt_pis']=datetime.strftime(dt_pis,'%d/%m/%Y')
+    #dt_pis=col4.date_input('Data')
+    #val_dict['datas']=datetime.strftime(dt_pis,'%d/%m/%Y')
 
     col5,col6,col7=tab3.columns(3)
     val_dict['titulo']=col5.text_input('Título de Eleitor',key='titulo')
     val_dict['zona']=col6.text_input('Zona',key='zona')
-    val_dict['secao']=col7._text_input('Seção',key='secao')
+    val_dict['secao']=col7.text_input('Seção',key='secao')
 
     col8,col9,col10,col11=tab3.columns(4)
-    val_dict['rg']=col8.text_input('RG',key='rg')
-    val_dict['orgao']=col9.text_input('Órgão Emissor',key='orgao')
-    val_dict['uf_rg']=col10.text_input('UF',key='uf_rg')
+    val_dict['registro']=col8.text_input('RG',key='rg')
+    val_dict['doc_emt']=col9.text_input('Órgão Emissor',key='orgao')
+    val_dict['unidadef']=col10.text_input('UF',key='uf_rg')
     dt_exped=col11.date_input('Data de Expedição',key='dt_exped')
     val_dict['dt_exped']=datetime.strftime(dt_exped,'%d/%m/%Y')
 
@@ -92,7 +95,7 @@ def Main():
     cpf_dep=col2.text_input('CPF',key='cpf_dep')
     btn=tab4.button('Adicionar')
 
-    tabela=st.empty()
+    tabela=tab4.empty()
     df=pd.DataFrame(columns=['CPF','Dependente','Data de Nascimento'])
 
     temp_path=os.path.join(os.getcwd(),cpf)
@@ -132,7 +135,9 @@ def Main():
 
     #tab5 - anexo
 
-    imagens=tab5.file_uploader('Documentos',accept_multiple_files=True,key='upload',type=['.png','.jpg'])
+    tab5.markdown('<h4>Não inserir arquivos que não sejam da extensão informada na importação.</h4>',unsafe_allow_html=True)
+
+    imagens=tab5.file_uploader('Documentos',accept_multiple_files=True,key='upload',type=['.png','.jpg','.jpeg'])
     path_base=os.getcwd()
 
     temp_path=os.path.join(os.getcwd(),cpf)
@@ -198,65 +203,90 @@ def Main():
 
     col1,col2=tab6.columns(2)
     val_dict['banco']=col1.selectbox('Banco',options=['Itaú Unibanco','Bradesco','Banco do Brasil','Caixa Econômica Federal','Santander'],key='banco')
-    val_dict['tpconta']=col2.text_input('Tipo de Conta',key='tpconta')
+    val_dict['tpconta']=col2.selectbox('Tipo de Conta',options=['Conta Corrente','Conta Poupança'],key='tpconta')
     col3,col4=tab6.columns(2)
     val_dict['agencia']=col3.text_input('Agência',key='agencia')
-    val_dict['conta']=col4.text_input('Conta',key='conta')
+    val_dict['conta']=col4.text_input('Conta',key='conta',placeholder='Digitar a conta com o digito')
 
     #preencher o arquivo
     btn_send=sidebar.button('Enviar')
     
     if btn_send==True:
 
-        temp_path=os.path.join(os.getcwd(),cpf,f'{cpf}-{val_dict["nome"]}.docx')
-        
-        doc=Document('Base.docx')
+        loop=True
 
-        for pag in doc.paragraphs:
+        for c in val_dict.keys():
 
-            for codigo in val_dict:
+            if val_dict[c]!='' or c=='pai':
 
-                valor=val_dict[codigo]
+                continue
 
-                pag.text=pag.text.replace(codigo,valor)
+            else:
 
-                pass
+                sidebar.warning(f'Por favor preencher o campo {c}')
+                loop=False
+
+                break
 
             pass
 
-        doc.save(temp_path)
+        if loop==True:
 
-        msg='Bom dia' if datetime.now().hour<12 else 'Boa tarde'
+            st.warning('Carregando aguarde...')
 
-        assunto=f'Documentos {val_dict["nome"]}'
+            temp_path=os.path.join(os.getcwd(),cpf,f'{cpf}-{val_dict["nome"]}.docx')
+            
+            doc=Document('Base.docx')
 
-        mensagem=f"""
-        
-        <p>{msg};</p>
+            for pag in doc.paragraphs:
 
-        <p>RH</p>
+                for codigo in val_dict:
 
-        <p>Segue o e-mail com os documentos para admissão do novo funcionário: <b>{str(val_dict["nome"]).title()}<b></p>
+                    valor=val_dict[codigo]
 
-        <P>Por favor não responder mensagem automática</P>
+                    pag.text=pag.text.replace(codigo,valor)
 
-        <p>Atenciosamente</p>
+                    pass
 
-        <p>BOT TI</p>
-        
-        """
+                pass
 
-        temp_path=os.path.join(os.getcwd(),cpf,'*.*')
-        arquivos=glob(temp_path)
+            doc.save(temp_path)
 
-        temp_dict={'To':['eduardo.marfim@demarchibrasil.com.br'],'CC':[],'Anexo':arquivos}
+            msg='Bom dia' if datetime.now().hour<12 else 'Boa tarde'
 
-        mail.Enviar(assunto=assunto,mensagem=mensagem,info=temp_dict)
+            assunto=f'Documentos {val_dict["nome"]}'
 
-        sidebar.success('E-mail enviado com sucesso')
+            mensagem=f"""
+            
+            <p>{msg};</p>
 
-        temp_path=os.path.join(os.getcwd(),cpf)
-        shutil.rmtree(temp_path)
+            <p>RH</p>
+
+            <p>Segue o e-mail com os documentos para admissão do novo funcionário: <b>{str(val_dict["nome"]).title()}<b></p>
+
+            <P>Por favor não responder mensagem automática</P>
+
+            <p>Atenciosamente</p>
+
+            <p>BOT TI</p>
+            
+            """
+
+            temp_path=os.path.join(os.getcwd(),cpf,'*.*')
+            arquivos=glob(temp_path)
+
+            temp_dict={'To':['documentos.rh@demarchisaopaulo.com.br'],'CC':[],'Anexo':arquivos}
+
+            mail.Enviar(assunto=assunto,mensagem=mensagem,info=temp_dict)
+
+            sidebar.success('E-mail enviado com sucesso')
+
+            temp_path=os.path.join(os.getcwd(),cpf)
+            shutil.rmtree(temp_path)
+            time.sleep(2)
+            streamlit_js_eval(js_expressions='parent.window.location.reload()')
+
+            pass
 
         pass
 

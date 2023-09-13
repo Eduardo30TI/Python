@@ -18,7 +18,7 @@ querys={
 
     """
     
-    SELECT * FROM netfeira.vw_estatistico
+    SELECT * FROM netfeira.vw_targetestatistico
     WHERE [ID Situação]='AB' AND [Data de Entrega]=CONVERT(DATETIME,CAST(GETDATE() AS DATE),101) 
     AND [Data de Emissão]=DATEADD(DAY,-1,CONVERT(DATETIME,CAST(GETDATE() AS DATE),101))
     AND [Tipo de Operação]<>'OUTROS'    
@@ -144,11 +144,11 @@ def Main(tabelas_df):
 
                 if(value!='ID Vendedor'):
 
-                    tabelas_df['Consolidado'].loc[tabelas_df['Consolidado'][value]==codigo[-1]].to_excel('Equipes.xlsx',index=False)
+                    tabelas_df['Consolidado'].loc[tabelas_df['Consolidado'][value]==codigo[-1]].to_excel('Equipes.xlsx',index=False,encoding='UTF-8')
 
                     pass
 
-                tabelas_df['Pedidos'].loc[tabelas_df['Pedidos'][value]==codigo[-1]].to_excel(f'{str(nome[-1]).title()}.xlsx',index=False)
+                tabelas_df['Pedidos'].loc[tabelas_df['Pedidos'][value]==codigo[-1]].to_excel(f'{str(nome[-1]).title()}.xlsx',index=False,encoding='UTF-8')
 
                 temp_path=os.path.join(os.getcwd(),'*.xlsx')
 

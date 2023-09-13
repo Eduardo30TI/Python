@@ -137,7 +137,7 @@ def Main():
 
         if len(arquivos)<=0:
 
-            temp_df.to_excel(path_base,index=False)
+            temp_df.to_excel(path_base,index=False,encoding='UTF-8')
 
             pass
 
@@ -167,7 +167,7 @@ def Main():
 
             vencido_df=temp_df.loc[temp_df['Dias']<=90]
 
-            vencido_df.to_excel('Vencido.xlsx',index=False)
+            vencido_df.to_excel('Vencido.xlsx',index=False,encoding='UTF-8')
 
             if len(vencido_df)>0:
 
@@ -204,7 +204,7 @@ def Main():
 
                 vencido_df.sort_values('Codigo',ascending=True,ignore_index=True,inplace=True)
 
-                vencido_df.to_excel('Vencido.xlsx',index=False)
+                vencido_df.to_excel('Vencido.xlsx',index=False,encoding='UTF-8')
 
                 temp=os.path.join(os.getcwd(),'Vencido.xlsx')
                 
@@ -214,7 +214,7 @@ def Main():
                 
                 pass
 
-            df[colunas].to_excel(path_base,index=False)
+            df[colunas].to_excel(path_base,index=False,encoding='UTF-8')
 
             pass
         

@@ -127,7 +127,7 @@ def Analise(carteira_df):
 
                 pass
 
-            temp_df.to_excel(f'Lista de Atendimento {nome}.xlsx',index=False)
+            temp_df.to_excel(f'Lista de Atendimento {nome}.xlsx',index=False,encoding='utf-8')
             
             grupo_df=temp_df[['Status de Atendimento','ID Cliente']].groupby(['Status de Atendimento'],as_index=False).count()
 
@@ -135,7 +135,7 @@ def Analise(carteira_df):
 
             grupo_df.sort_values('Contagem',ascending=False,inplace=True)
 
-            grupo_df.to_excel(f'Alerta {nome}.xlsx',index=False)
+            grupo_df.to_excel(f'Alerta {nome}.xlsx',index=False,encoding='utf-8')
             
             temp_path=os.path.join(os.getcwd(),'*.xlsx')
 

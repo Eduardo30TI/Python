@@ -22,13 +22,13 @@ querys={
     
     IF MONTH(GETDATE())=1
 
-        SELECT * FROM netfeira.vw_targetestatico
+        SELECT * FROM netfeira.vw_venda_estatico
         WHERE YEAR([Data de Faturamento])=YEAR(GETDATE())-1 AND MONTH([Data de Faturamento])=12
 
     ELSE
 
-        SELECT * FROM netfeira.vw_targetestatico
-        WHERE YEAR([Data de Faturamento])=YEAR(GETDATE()) AND MONTH([Data de Faturamento])=MONTH(GETDATE())-1    
+        SELECT * FROM netfeira.vw_venda_estatico
+        WHERE YEAR([Data de Faturamento])=YEAR(GETDATE()) AND MONTH([Data de Faturamento])=MONTH(GETDATE())-1 
     
     """,
     

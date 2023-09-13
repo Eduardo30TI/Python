@@ -147,7 +147,7 @@ def Main(df):
                 
                 """
 
-                temp_df.to_excel(f'{nome}.xlsx',index=False,encoding='UTF-8')
+                temp_df.to_excel(f'{nome}.xlsx',index=False)
 
                 temp_path=os.path.join(os.getcwd(),f'{nome}.xlsx')
 
@@ -157,7 +157,7 @@ def Main(df):
                                                 
             pass
 
-        whatsapp_df.to_excel(f'whatsapp.xlsx',index=False,encoding='UTF-8')
+        whatsapp_df.to_excel(f'whatsapp.xlsx',index=False)
 
         pass
 

@@ -131,7 +131,7 @@ def Main(df):
             
             """
 
-            df['Aberto'].loc[df['Aberto']['ID Vendedor']==c].to_excel(f'{nome}.xlsx',index=False,encoding='UTF-8')
+            df['Aberto'].loc[df['Aberto']['ID Vendedor']==c].to_excel(f'{nome}.xlsx',index=False)
 
             temp_path=os.path.join(os.getcwd(),f'{nome}.xlsx')
 
@@ -139,7 +139,7 @@ def Main(df):
                     
             pass
 
-        whatsapp_df.to_excel(f'whatsapp.xlsx',index=False,encoding='UTF-8')
+        whatsapp_df.to_excel(f'whatsapp.xlsx',index=False)
 
         pass
 
