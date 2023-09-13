@@ -31,7 +31,7 @@ def Main():
     st.markdown('<h4>Envio de documentação para admissão</h4>',unsafe_allow_html=True)
     st.markdown('<hr/>',unsafe_allow_html=True)
 
-    tab1,tab2,tab3,tab4,tab5,tab6=st.tabs(['Dados Pessoais','Endereço','Documentos','Dependentes','Anexo','Banco'])
+    tab1,tab2,tab3,tab4,tab5,tab6,tab7=st.tabs(['Dados Pessoais','Endereço','Documentos','Dependentes','Anexo','Banco','Foto'])
 
     #tab1 - dados pessoais
     val_dict['func_empresa']=tab1.selectbox('Empresa',options=['NETFEIRA PONTOCOM LTDA'],key='empresa')
@@ -290,6 +290,16 @@ def Main():
 
         pass
 
+    tab7.markdown('<h4>Não inserir arquivos que não sejam da extensão informada na importação.</h4>',unsafe_allow_html=True)
+
+    imagens=tab7.file_uploader('Foto',accept_multiple_files=False,key='foto',type=['.png','.jpg','.jpeg'])
+    path_base=os.getcwd()
+
+    temp_path=os.path.join(os.getcwd(),cpf)
+
+    os.chdir(temp_path)
+
+    
     pass
 
 
